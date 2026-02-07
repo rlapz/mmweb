@@ -32,5 +32,7 @@ go.work.sum
 # .vscode/
 
 db.sqlite
+db.sqlite-shm
+db.sqlite-wal
 run.sh
 
