@@ -46,7 +46,7 @@ func (m *Middleware) addItems() {
 
 func (m *Middleware) addAuthExcluded() {
 	m.authExcluded = util.SetNew()
-	m.authExcluded.Add([]string{
+	m.authExcluded.Add([]any{
 		"/",
 		"/login",
 	})

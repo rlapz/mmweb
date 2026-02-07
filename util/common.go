@@ -11,31 +11,6 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-type Set struct {
-	item map[string]struct{}
-}
-
-func SetNew() Set {
-	return Set{
-		item: make(map[string]struct{}),
-	}
-}
-
-func (s *Set) Add(entry []string) {
-	for _, x := range entry {
-		s.item[x] = struct{}{}
-	}
-}
-
-func (s *Set) Del(entry string) {
-	delete(s.item, entry)
-}
-
-func (s *Set) Check(entry string) bool {
-	_, isOk := s.item[entry]
-	return isOk
-}
-
 func JwtMakeClaims(method *jwt.SigningMethodHMAC, issuer string, exp time.Duration) *jwt.Token {
 	now := time.Now()
 	return jwt.NewWithClaims(method, jwt.MapClaims{
