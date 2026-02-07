@@ -1,13 +1,13 @@
 package sqlite
 
-import "github.com/rlapz/mmweb/util"
+import "github.com/rlapz/mmweb/db"
 
 type Repo struct {
-	db *util.SqlitePool
+	db *db.SqlitePool
 }
 
-func New(db *util.SqlitePool) *Repo {
+func New(dbb *db.SqlitePool) *Repo {
 	return &Repo{
-		db: db,
+		db: dbb,
 	}
 }

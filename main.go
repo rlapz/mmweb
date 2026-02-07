@@ -12,9 +12,9 @@ import (
 
 	"github.com/rlapz/mmweb/config"
 	"github.com/rlapz/mmweb/controller"
+	"github.com/rlapz/mmweb/db"
 	"github.com/rlapz/mmweb/middleware"
 	"github.com/rlapz/mmweb/service"
-	"github.com/rlapz/mmweb/util"
 
 	_ "modernc.org/sqlite"
 
@@ -57,15 +57,15 @@ func run(cfg *config.Config) error {
 		log.Println("gracefully stopped :-)")
 	}()
 
-	db, err := util.SqlitePoolNew(cfg.DbPath, cfg.DbPoolInitSize)
+	dbb, err := db.SqlitePoolNew(cfg.DbPath, cfg.DbPoolInitSize)
 	if err != nil {
 		log.Println("error: Run: SqlitePoolNew:", err)
 		return err
 	}
-	defer db.Destory()
+	defer dbb.Destory()
 
 	mux := middleware.New(cfg)
-	repp := repoSqlite.New(db)
+	repp := repoSqlite.New(dbb)
 	srvv := service.New(repp)
 
 	controller.Init(cfg, mux, srvv)
