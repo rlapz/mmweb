@@ -1,0 +1,15 @@
+#!/bin/sh
+set -e
+
+
+export MMWEB_LISTEN_HOST='127.0.0.1'
+export MMWEB_LISTEN_PORT='8008'
+
+export MMWEB_SECRET_KEY='abc'
+
+export MMWEB_DB_PATH='./db.sqlite'
+export MMWEB_DB_POOL_INIT_SIZE=8
+
+go build
+
+./mmweb
