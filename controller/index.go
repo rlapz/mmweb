@@ -3,7 +3,7 @@ package controller
 import (
 	"net/http"
 
-	"github.com/rlapz/mmweb/src/util"
+	"github.com/rlapz/mmweb/util"
 )
 
 func (c *Controller) indexHandler(w http.ResponseWriter, r *http.Request) {

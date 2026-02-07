@@ -3,7 +3,7 @@ package repo
 import (
 	"context"
 
-	"github.com/rlapz/mmweb/src/model"
+	"github.com/rlapz/mmweb/model"
 )
 
 type Repo interface {

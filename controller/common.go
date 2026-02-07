@@ -3,7 +3,7 @@ package controller
 import (
 	"fmt"
 
-	"github.com/rlapz/mmweb/src/model/api"
+	"github.com/rlapz/mmweb/model/api"
 )
 
 func PaginationSetNav(baseUrl string, pag *api.ApiRespPagination) *api.ApiRespPagination {

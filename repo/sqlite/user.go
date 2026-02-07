@@ -3,7 +3,7 @@ package sqlite
 import (
 	"context"
 
-	"github.com/rlapz/mmweb/src/repo/sqlite/query"
+	"github.com/rlapz/mmweb/repo/sqlite/query"
 )
 
 func (r *Repo) SelectUserPasswordByName(ctx context.Context, uname string) (string, error) {

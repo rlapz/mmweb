@@ -4,8 +4,8 @@ import (
 	"net/http"
 
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/rlapz/mmweb/src/config"
-	"github.com/rlapz/mmweb/src/util"
+	"github.com/rlapz/mmweb/config"
+	"github.com/rlapz/mmweb/util"
 )
 
 type Middleware struct {

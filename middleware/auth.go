@@ -5,8 +5,8 @@ import (
 	"strings"
 
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/rlapz/mmweb/src/errorx"
-	"github.com/rlapz/mmweb/src/util"
+	"github.com/rlapz/mmweb/errorx"
+	"github.com/rlapz/mmweb/util"
 )
 
 const bear = "Bearer"

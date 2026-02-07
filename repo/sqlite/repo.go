@@ -1,6 +1,6 @@
 package sqlite
 
-import "github.com/rlapz/mmweb/src/util"
+import "github.com/rlapz/mmweb/util"
 
 type Repo struct {
 	db *util.SqlitePool

@@ -6,9 +6,9 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/rlapz/mmweb/src/config"
-	"github.com/rlapz/mmweb/src/middleware"
-	"github.com/rlapz/mmweb/src/service"
+	"github.com/rlapz/mmweb/config"
+	"github.com/rlapz/mmweb/middleware"
+	"github.com/rlapz/mmweb/service"
 )
 
 type controllerItem struct {

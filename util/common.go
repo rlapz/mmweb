@@ -7,7 +7,7 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
-	"github.com/rlapz/mmweb/src/config"
+	"github.com/rlapz/mmweb/config"
 	"golang.org/x/crypto/bcrypt"
 )
 

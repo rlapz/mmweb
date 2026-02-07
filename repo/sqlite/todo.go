@@ -4,9 +4,9 @@ import (
 	"context"
 	"time"
 
-	"github.com/rlapz/mmweb/src/errorx"
-	"github.com/rlapz/mmweb/src/model"
-	"github.com/rlapz/mmweb/src/repo/sqlite/query"
+	"github.com/rlapz/mmweb/errorx"
+	"github.com/rlapz/mmweb/model"
+	"github.com/rlapz/mmweb/repo/sqlite/query"
 )
 
 func (r *Repo) InsertTodo(ctx context.Context, uname string, todo *model.Todo) error {

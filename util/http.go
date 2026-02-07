@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/rlapz/mmweb/src/model/api"
+	"github.com/rlapz/mmweb/model/api"
 )
 
 func httpResp(w http.ResponseWriter, code int, resp *api.ApiResp) {

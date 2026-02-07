@@ -5,8 +5,8 @@ import (
 	"database/sql"
 	"errors"
 
-	"github.com/rlapz/mmweb/src/errorx"
-	"github.com/rlapz/mmweb/src/util"
+	"github.com/rlapz/mmweb/errorx"
+	"github.com/rlapz/mmweb/util"
 )
 
 func (s *Service) Auth(ctx context.Context, uname, passwd string) error {

@@ -1,6 +1,6 @@
 package service
 
-import "github.com/rlapz/mmweb/src/repo"
+import "github.com/rlapz/mmweb/repo"
 
 type Service struct {
 	repo repo.Repo

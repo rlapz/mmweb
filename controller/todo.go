@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/rlapz/mmweb/src/errorx"
-	"github.com/rlapz/mmweb/src/model"
-	"github.com/rlapz/mmweb/src/model/api"
-	"github.com/rlapz/mmweb/src/util"
+	"github.com/rlapz/mmweb/errorx"
+	"github.com/rlapz/mmweb/model"
+	"github.com/rlapz/mmweb/model/api"
+	"github.com/rlapz/mmweb/util"
 )
 
 func (c *Controller) todoHandler(w http.ResponseWriter, r *http.Request) {

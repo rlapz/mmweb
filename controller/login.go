@@ -4,8 +4,8 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/rlapz/mmweb/src/errorx"
-	"github.com/rlapz/mmweb/src/util"
+	"github.com/rlapz/mmweb/errorx"
+	"github.com/rlapz/mmweb/util"
 )
 
 func (c *Controller) loginHandler(w http.ResponseWriter, r *http.Request) {

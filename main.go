@@ -10,15 +10,15 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/rlapz/mmweb/src/config"
-	"github.com/rlapz/mmweb/src/controller"
-	"github.com/rlapz/mmweb/src/middleware"
-	"github.com/rlapz/mmweb/src/service"
-	"github.com/rlapz/mmweb/src/util"
+	"github.com/rlapz/mmweb/config"
+	"github.com/rlapz/mmweb/controller"
+	"github.com/rlapz/mmweb/middleware"
+	"github.com/rlapz/mmweb/service"
+	"github.com/rlapz/mmweb/util"
 
 	_ "modernc.org/sqlite"
 
-	repoSqlite "github.com/rlapz/mmweb/src/repo/sqlite"
+	repoSqlite "github.com/rlapz/mmweb/repo/sqlite"
 )
 
 func serve(mux *middleware.Middleware, cfg *config.Config) error {
