@@ -1,3 +1,1 @@
-# Pure Golang RESt API backend
-
-### My Golang exercise journey
+# My Golang and ReactJS exercise journey
