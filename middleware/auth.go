@@ -24,8 +24,8 @@ func (m *Middleware) AuthHandler(next http.Handler) http.Handler {
 			return
 		}
 
-		tokr := strings.ReplaceAll(auth, "Bearer ", "")
-		tok, err := jwt.Parse(tokr, func(tok *jwt.Token) (any, error) {
+		token := strings.ReplaceAll(auth, "Bearer ", "")
+		tokenSinged, err := jwt.Parse(token, func(tok *jwt.Token) (any, error) {
 			mth, ok := tok.Method.(*jwt.SigningMethodHMAC)
 			if !ok || mth != m.signMethod {
 				return nil, errorx.AuthSignMethod
@@ -39,13 +39,13 @@ func (m *Middleware) AuthHandler(next http.Handler) http.Handler {
 			return
 		}
 
-		cl, ok := tok.Claims.(jwt.MapClaims)
-		if !ok || !tok.Valid {
+		claims, ok := tokenSinged.Claims.(jwt.MapClaims)
+		if !ok || !tokenSinged.Valid {
 			util.HttpErrUnauthorized(w, errorx.AuthTokenClaims.Error())
 			return
 		}
 
-		r = util.JwtClaimsSetContext(r, cl)
+		util.ContextSetJwtClaims(&r, claims)
 
 		next.ServeHTTP(w, r)
 	})

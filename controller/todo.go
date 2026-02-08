@@ -22,7 +22,7 @@ func (c *Controller) todoHandler(w http.ResponseWriter, r *http.Request) {
 	case http.MethodDelete:
 		c.deleteTodoItem(w, r)
 	default:
-		util.HttpMethodCheck(w, r, "")
+		util.HttpMethodCheck(w, r, "invalid")
 	}
 }
 
@@ -31,7 +31,7 @@ func (c *Controller) getTodoList(w http.ResponseWriter, r *http.Request) {
 	//id := query.Get("id")
 	// if id == "" -> show all todos, else -> show detail todo
 
-	claims := util.JwtClaimsGetContext(r.Context())
+	claims := util.ContextGetJwtClaims(r.Context())
 
 	body := api.ApiRespBodyList{
 		List: []string{
@@ -53,7 +53,7 @@ func (c *Controller) postTodoItem(w http.ResponseWriter, r *http.Request) {
 	}
 
 	ctx := r.Context()
-	claims := util.JwtClaimsGetContext(ctx)
+	claims := util.ContextGetJwtClaims(ctx)
 	uname, err := claims.GetIssuer()
 	if err != nil {
 		util.HttpErrInternal(w, err, "failed to get context claims")

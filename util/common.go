@@ -11,22 +11,25 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func JwtMakeClaims(method *jwt.SigningMethodHMAC, issuer string, exp time.Duration) *jwt.Token {
+func JwtMakeSignedToken(method *jwt.SigningMethodHMAC, key []byte, issuer string,
+	exp time.Duration) (string, error) {
 	now := time.Now()
-	return jwt.NewWithClaims(method, jwt.MapClaims{
+	token := jwt.NewWithClaims(method, jwt.MapClaims{
 		"iss": issuer,
 		"jti": uuid.NewString(),
 		"iat": now.Unix(),
 		"exp": now.Add(exp).Unix(),
 	})
+
+	return token.SignedString(key)
 }
 
-func JwtClaimsSetContext(r *http.Request, cl jwt.Claims) *http.Request {
+func ContextSetJwtClaims(r **http.Request, cl jwt.Claims) {
 	ctx := context.WithValue(context.Background(), config.CLAIMS_CONTEXT_NAME, cl)
-	return r.WithContext(ctx)
+	*r = (*r).WithContext(ctx)
 }
 
-func JwtClaimsGetContext(ctx context.Context) jwt.MapClaims {
+func ContextGetJwtClaims(ctx context.Context) jwt.MapClaims {
 	return ctx.Value(config.CLAIMS_CONTEXT_NAME).(jwt.MapClaims)
 }
 

@@ -30,13 +30,11 @@ func (c *Controller) loginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	claims := util.JwtMakeClaims(c.signMethod, uname, c.loginExp)
-
-	signed, err := claims.SignedString(c.signKey)
+	token, err := util.JwtMakeSignedToken(c.signMethod, c.signKey, uname, c.loginExp)
 	if err != nil {
-		util.HttpErrInternal(w, err, "failed to sign key")
+		util.HttpErrInternal(w, err, "failed to make and sign token")
 		return
 	}
 
-	util.HttpOk(w, "ok", signed)
+	util.HttpOk(w, "ok", token)
 }
