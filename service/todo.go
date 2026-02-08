@@ -12,5 +12,5 @@ func (s *Service) AddTodo(ctx context.Context, uname string, todo *model.Todo) e
 		return errorx.DataInvalid
 	}
 
-	return s.repo.InsertTodo(ctx, uname, todo)
+	return s.repo.TodoInsert(ctx, uname, todo)
 }

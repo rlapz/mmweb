@@ -6,7 +6,7 @@ import (
 	"github.com/rlapz/mmweb/repo/sqlite/query"
 )
 
-func (r *Repo) SelectUserPasswordByName(ctx context.Context, uname string) (string, error) {
+func (r *Repo) UserSelectPasswordByName(ctx context.Context, uname string) (string, error) {
 	conn := r.db.GetConn()
 	defer r.db.PutConn(conn)
 

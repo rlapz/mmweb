@@ -19,7 +19,7 @@ func (c *controllerAuth) loginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := c.service.Auth(r.Context(), uname, pswd)
+	err := c.service.AuthUser(r.Context(), uname, pswd)
 	switch {
 	case err == nil: // ok
 	case errors.Is(err, errorx.AuthInvalidCredential):

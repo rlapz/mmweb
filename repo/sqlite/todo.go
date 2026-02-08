@@ -9,7 +9,7 @@ import (
 	"github.com/rlapz/mmweb/repo/sqlite/query"
 )
 
-func (r *Repo) InsertTodo(ctx context.Context, uname string, todo *model.Todo) error {
+func (r *Repo) TodoInsert(ctx context.Context, uname string, todo *model.Todo) error {
 	conn := r.db.GetConn()
 	defer r.db.PutConn(conn)
 
@@ -28,7 +28,7 @@ func (r *Repo) InsertTodo(ctx context.Context, uname string, todo *model.Todo) e
 	return err
 }
 
-func (r *Repo) SelectTodoById(ctx context.Context, id int32) (*model.Todo, error) {
+func (r *Repo) TodoSelectById(ctx context.Context, id int32) (*model.Todo, error) {
 	conn := r.db.GetConn()
 	defer r.db.PutConn(conn)
 
