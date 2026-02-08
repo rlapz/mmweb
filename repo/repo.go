@@ -11,4 +11,7 @@ type Repo interface {
 
 	InsertTodo(ctx context.Context, uname string, todo *model.Todo) error
 	SelectTodoById(ctx context.Context, id int32) (*model.Todo, error)
+
+	AuthTokenInvalidInsert(ctx context.Context, token string) error
+	AuthTokenInvalidCheck(ctx context.Context, token string) error
 }
