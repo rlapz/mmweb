@@ -13,3 +13,10 @@ const SelectTodoById = `
 	FROM t_todo
 	WHERE (id = ?)
 `
+
+const SelectTodoByUsername = `
+	SELECT a.id, a.id_user, a.title, a.description, a.flags, a.created_at, a.created_by
+	FROM t_todo AS a
+	JOIN t_user AS b ON (a.id_user = b.id)
+	WHERE (b.name = ?)
+`

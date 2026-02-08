@@ -1,9 +1,10 @@
 package api
 
 type ApiResp struct {
-	Success bool   `json:"success"`
-	Message string `json:"message"`
-	Body    any    `json:"body,omitempty"`
+	Success    bool               `json:"success"`
+	Message    string             `json:"message"`
+	Data       any                `json:"data,omitempty"`
+	Pagination *ApiRespPagination `json:"pagination,omitempty"`
 }
 
 type ApiRespPagination struct {
@@ -14,9 +15,4 @@ type ApiRespPagination struct {
 
 	Next string `json:"next,omitempty"`
 	Prev string `json:"prev,omitempty"`
-}
-
-type ApiRespBodyList struct {
-	List       any               `json:"list"`
-	Pagination ApiRespPagination `json:"pagination"`
 }

@@ -58,21 +58,21 @@ func HttpErrUnauthorized(w http.ResponseWriter, msg string) {
 	httpRespErr(w, nil, http.StatusUnauthorized, "unauthorized", msg)
 }
 
-func HttpOk(w http.ResponseWriter, msg string, body any) {
+func HttpOk(w http.ResponseWriter, msg string, data any) {
 	resp := api.ApiResp{
 		Success: true,
 		Message: msg,
-		Body:    body,
+		Data:    data,
 	}
 
 	httpResp(w, http.StatusOK, &resp)
 }
 
-func HttpCreated(w http.ResponseWriter, msg string, body any) {
+func HttpCreated(w http.ResponseWriter, msg string, data any) {
 	resp := api.ApiResp{
 		Success: true,
 		Message: msg,
-		Body:    body,
+		Data:    data,
 	}
 
 	httpResp(w, http.StatusCreated, &resp)

@@ -1,20 +1,20 @@
 package controller
 
 import (
+	"context"
 	"errors"
-	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/rlapz/mmweb/errorx"
 	"github.com/rlapz/mmweb/model"
-	"github.com/rlapz/mmweb/model/api"
 	"github.com/rlapz/mmweb/util"
 )
 
 func (c *controller) todoHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
-		c.getTodoList(w, r)
+		c.getTodo(w, r)
 	case http.MethodPost:
 		c.postTodoItem(w, r)
 	case http.MethodPut:
@@ -26,24 +26,46 @@ func (c *controller) todoHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (c *controller) getTodoList(w http.ResponseWriter, r *http.Request) {
+func (c *controller) getTodo(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query()
-	//id := query.Get("id")
-	// if id == "" -> show all todos, else -> show detail todo
+	id := query.Get("id")
 
-	claims := util.ContextGetJwtClaims(r.Context())
-
-	body := api.ApiRespBodyList{
-		List: []string{
-			claims["token"].(string),
-			claims["iss"].(string),
-			claims["jti"].(string),
-			query.Get("id"),
-			fmt.Sprint(query),
-		},
+	ctx := r.Context()
+	claims := util.ContextGetJwtClaims(ctx)
+	uname, err := claims.GetIssuer()
+	if err != nil {
+		util.HttpErrInternal(w, err, "failed to get claims context")
+		return
 	}
 
-	util.HttpOk(w, "ok", body)
+	if id == "" {
+		c.getTodoList(ctx, w, uname)
+		return
+	}
+
+	idInt, err := strconv.ParseInt(id, 10, 32)
+	if err != nil {
+		util.HttpErrBadRequest(w, "invalid 'id' value")
+		return
+	}
+
+	data, err := c.service.GetTodoById(ctx, int32(idInt))
+	if err != nil {
+		util.HttpErrInternal(w, err, "failed to get todo")
+		return
+	}
+
+	util.HttpOk(w, "ok", data)
+}
+
+func (c *controller) getTodoList(ctx context.Context, w http.ResponseWriter, uname string) {
+	list, err := c.service.GetTodoByUsername(ctx, uname)
+	if err != nil {
+		util.HttpErrInternal(w, err, "failed to get todo list")
+		return
+	}
+
+	util.HttpOk(w, "ok", list)
 }
 
 func (c *controller) postTodoItem(w http.ResponseWriter, r *http.Request) {
