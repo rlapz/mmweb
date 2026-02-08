@@ -7,6 +7,7 @@ import (
 	"github.com/rlapz/mmweb/errorx"
 	"github.com/rlapz/mmweb/model"
 	"github.com/rlapz/mmweb/repo/sqlite/query"
+	"github.com/rlapz/mmweb/util"
 )
 
 func (r *Repo) TodoInsert(ctx context.Context, uname string, todo *model.Todo) error {
@@ -14,18 +15,18 @@ func (r *Repo) TodoInsert(ctx context.Context, uname string, todo *model.Todo) e
 	defer r.db.PutConn(conn)
 
 	todo.CreatedAt = time.Now()
-	res, err := conn.Db.ExecContext(ctx, query.InsertTodo, todo.Title, todo.Description,
+
+	aff, err := util.DbTransactionTryExec(ctx, conn.Db, query.InsertTodo, todo.Title, todo.Description,
 		todo.Flags, todo.CreatedAt, uname)
 	if err != nil {
 		return err
 	}
 
-	aff, err := res.RowsAffected()
 	if aff == 0 {
 		return errorx.NoDataSaved
 	}
 
-	return err
+	return nil
 }
 
 func (r *Repo) TodoSelectById(ctx context.Context, id int32) (*model.Todo, error) {

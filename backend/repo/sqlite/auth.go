@@ -5,23 +5,23 @@ import (
 
 	"github.com/rlapz/mmweb/errorx"
 	"github.com/rlapz/mmweb/repo/sqlite/query"
+	"github.com/rlapz/mmweb/util"
 )
 
 func (r *Repo) AuthTokenInvalidInsert(ctx context.Context, token string) error {
 	conn := r.db.GetConn()
 	defer r.db.PutConn(conn)
 
-	res, err := conn.Db.ExecContext(ctx, query.AuthTokenInvalidInsert, token)
+	count, err := util.DbTransactionTryExec(ctx, conn.Db, query.AuthTokenInvalidInsert, token)
 	if err != nil {
 		return err
 	}
 
-	aff, err := res.RowsAffected()
-	if aff == 0 {
+	if count == 0 {
 		return errorx.NoDataSaved
 	}
 
-	return err
+	return nil
 }
 
 func (r *Repo) AuthTokenInvalidCheck(ctx context.Context, token string) error {

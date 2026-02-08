@@ -67,9 +67,6 @@ func (c *controller) postTodoItem(w http.ResponseWriter, r *http.Request) {
 	case errors.Is(err, errorx.DataInvalid):
 		util.HttpErrBadRequest(w, err.Error()+": make sure mandatory fields are not empty!")
 		return
-	case errors.Is(err, errorx.NoDataSaved):
-		util.HttpErrBadRequest(w, err.Error()+": there is no data inserted!")
-		return
 	default:
 		util.HttpErrInternal(w, err, "failed to add new item")
 		return

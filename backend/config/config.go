@@ -13,6 +13,8 @@ const (
 	APP_NAME = "mmweb"
 
 	CLAIMS_CONTEXT_NAME = "claims_context"
+	DB_TRY_MAX          = 60
+	DB_TRY_WAIT         = time.Millisecond * 100
 
 	/* Default */
 	DEF_LISTEN_HOST = "127.0.0.1"
