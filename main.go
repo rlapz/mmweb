@@ -53,9 +53,7 @@ func serve(mux *middleware.Middleware, cfg *config.Config) error {
 }
 
 func run(cfg *config.Config) error {
-	defer func() {
-		log.Println("gracefully stopped :-)")
-	}()
+	defer log.Println("gracefully stopped :-)")
 
 	dbb, err := db.SqlitePoolNew(cfg.DbPath, cfg.DbPoolInitSize)
 	if err != nil {
@@ -64,14 +62,14 @@ func run(cfg *config.Config) error {
 	}
 	defer dbb.Destory()
 
-	mux := middleware.New(cfg)
+	mid := middleware.New(cfg)
 	repp := repoSqlite.New(dbb)
 	srvv := service.New(repp)
 
-	controller.Init(cfg, mux, srvv)
-	controller.InitAuth(cfg, mux, srvv)
+	controller.Init(cfg, mid, srvv)
+	controller.InitAuth(cfg, mid, srvv)
 
-	err = serve(mux, cfg)
+	err = serve(mid, cfg)
 	if err != nil {
 		log.Println("error: Run: serve:", err)
 	}
