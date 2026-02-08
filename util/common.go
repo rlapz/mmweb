@@ -2,6 +2,7 @@ package util
 
 import (
 	"context"
+	"database/sql"
 	"net/http"
 	"time"
 
@@ -44,6 +45,34 @@ func HashPasswordVerify(hash, plain string) bool {
 	}
 
 	return false
+}
+
+func DbTrx(ctx context.Context, db *sql.DB,
+	handler func(ctx context.Context, trx *sql.Tx, args ...any) error,
+	args ...any) error {
+
+	tx, err := db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+			panic(r)
+		} else if err != nil {
+			tx.Rollback()
+		}
+	}()
+
+	err = handler(ctx, tx, args)
+	if err != nil {
+		return err
+	}
+
+	// don't forget to update err variable
+	err = tx.Commit()
+	return err
 }
 
 func Cnd[T any](cond bool, expected, alt T) T {
