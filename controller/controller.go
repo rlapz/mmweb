@@ -24,8 +24,8 @@ func Init(cfg *config.Config, mid *middleware.Middleware, srv *service.Service) 
 	c := new(controller)
 	c.service = srv
 
-	mid.HandleFunc("/", c.indexHandler)
-	mid.HandleFunc("/todo", c.todoHandler)
+	mid.AddHandler("/", c.indexHandler, middleware.FLAG_AUTH_EXCLUDED)
+	mid.AddHandler("/todo", c.todoHandler, 0)
 }
 
 func InitAuth(cfg *config.Config, mid *middleware.Middleware, srv *service.Service) {
@@ -35,5 +35,5 @@ func InitAuth(cfg *config.Config, mid *middleware.Middleware, srv *service.Servi
 	ca.signKey = cfg.JwtSignatureKey
 	ca.loginExp = cfg.LoginExp
 
-	mid.HandleFunc("/login", ca.loginHandler)
+	mid.AddHandler("/login", ca.loginHandler, middleware.FLAG_AUTH_EXCLUDED)
 }

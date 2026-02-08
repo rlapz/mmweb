@@ -9,6 +9,11 @@ import (
 	"github.com/rlapz/mmweb/util"
 )
 
+const (
+	// exclude path from authentication list (without authentication token)
+	FLAG_AUTH_EXCLUDED = (1 << 0)
+)
+
 type Middleware struct {
 	http.ServeMux
 
@@ -23,14 +28,19 @@ func New(cfg *config.Config) *Middleware {
 
 	m.signMethod = cfg.JwtSignMethod
 	m.signKey = cfg.JwtSignatureKey
+	m.authExcluded = util.SetNew()
 	m.addItems()
-	m.addAuthExcluded()
 
 	return m
 }
 
-func (m *Middleware) HandleFunc(path string, handler http.HandlerFunc) {
+func (m *Middleware) AddHandler(path string, handler http.HandlerFunc, flags int) {
+	if (flags & FLAG_AUTH_EXCLUDED) != 0 {
+		m.authExcluded.Add(path)
+	}
+
 	m.ServeMux.HandleFunc(path, handler)
+
 	log.Println("path:", path)
 }
 
@@ -48,12 +58,4 @@ func (m *Middleware) addItems() {
 		m.AuthHandler,
 		m.LogHandler,
 	}
-}
-
-func (m *Middleware) addAuthExcluded() {
-	m.authExcluded = util.SetNew()
-	m.authExcluded.Add([]any{
-		"/",
-		"/login",
-	})
 }

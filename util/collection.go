@@ -10,10 +10,8 @@ func SetNew() Set {
 	}
 }
 
-func (s *Set) Add(entry []any) {
-	for _, x := range entry {
-		s.item[x] = struct{}{}
-	}
+func (s *Set) Add(entry any) {
+	s.item[entry] = struct{}{}
 }
 
 func (s *Set) Del(entry any) {
