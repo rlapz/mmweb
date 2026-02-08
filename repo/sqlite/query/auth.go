@@ -1,8 +1,8 @@
 package query
 
 const AuthTokenInvalidInsert = `
-	INSERT INTO t_auth_token_invalid(token)
-	VALUE (?)
+	INSERT INTO t_auth_token_invalid(value)
+	VALUES (?)
 `
 
 const AuthTokenInvalidCheck = `

@@ -57,6 +57,7 @@ func (m *Middleware) AuthHandler(next http.Handler) http.Handler {
 			return
 		}
 
+		claims["token"] = token
 		util.ContextSetJwtClaims(&r, claims)
 
 		next.ServeHTTP(w, r)

@@ -38,3 +38,19 @@ func (c *controllerAuth) loginHandler(w http.ResponseWriter, r *http.Request) {
 
 	util.HttpOk(w, "ok", token)
 }
+
+func (c *controllerAuth) logoutHandler(w http.ResponseWriter, r *http.Request) {
+	if !util.HttpMethodCheck(w, r, http.MethodPost) {
+		return
+	}
+
+	ctx := r.Context()
+	claims := util.ContextGetJwtClaims(ctx)
+	err := c.service.AuthTokenAdd(ctx, claims["token"].(string))
+	if err != nil {
+		util.HttpErrInternal(w, err, "failed to invalidate token")
+		return
+	}
+
+	util.HttpCreated(w, "ok", nil)
+}

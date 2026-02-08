@@ -35,6 +35,7 @@ func (c *controller) getTodoList(w http.ResponseWriter, r *http.Request) {
 
 	body := api.ApiRespBodyList{
 		List: []string{
+			claims["token"].(string),
 			claims["iss"].(string),
 			claims["jti"].(string),
 			query.Get("id"),

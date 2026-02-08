@@ -34,3 +34,7 @@ func (s *Service) AuthTokenCheck(ctx context.Context, token string) (bool, error
 
 	return false, err
 }
+
+func (s *Service) AuthTokenAdd(ctx context.Context, token string) error {
+	return s.repo.AuthTokenInvalidInsert(ctx, token)
+}

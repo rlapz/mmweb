@@ -36,4 +36,5 @@ func InitAuth(cfg *config.Config, mid *middleware.Middleware, srv *service.Servi
 	ca.loginExp = cfg.LoginExp
 
 	mid.AddHandler("/login", ca.loginHandler, middleware.FLAG_AUTH_EXCLUDED)
+	mid.AddHandler("/logout", ca.logoutHandler, 0)
 }
