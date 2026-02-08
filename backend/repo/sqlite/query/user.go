@@ -1,6 +1,6 @@
 package query
 
-const SelectUserPasswordByName = `
+const UserSelectPasswordByName = `
 	SELECT password
 	FROM t_user
 	WHERE (name = ?)

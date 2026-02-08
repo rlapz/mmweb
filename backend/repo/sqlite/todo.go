@@ -18,7 +18,7 @@ func (r *Repo) TodoInsert(ctx context.Context, uname string, todo *model.Todo) e
 
 	todo.CreatedAt = time.Now()
 
-	aff, err := util.DbTransactionTryExec(ctx, conn.Db, query.InsertTodo, todo.Title, todo.Description,
+	aff, err := util.DbTransactionTryExec(ctx, conn.Db, query.TodoInsert, todo.Title, todo.Description,
 		todo.Flags, todo.CreatedAt, uname)
 	if err != nil {
 		return err
@@ -36,7 +36,7 @@ func (r *Repo) TodoSelectById(ctx context.Context, id int32) (*model.Todo, error
 	defer r.db.PutConn(conn)
 
 	ret := new(model.Todo)
-	row := conn.Db.QueryRowContext(ctx, query.SelectTodoById, id)
+	row := conn.Db.QueryRowContext(ctx, query.TodoSelectById, id)
 	err := row.Scan(&ret.Id, &ret.IdUser, &ret.Title, &ret.Description, &ret.Flags,
 		&ret.CreatedAt, &ret.CreatedBy)
 	if errors.Is(err, sql.ErrNoRows) {
@@ -50,7 +50,7 @@ func (r *Repo) TodoSelectByUsername(ctx context.Context, uname string) ([]model.
 	conn := r.db.GetConn()
 	defer r.db.PutConn(conn)
 
-	rows, err := conn.Db.QueryContext(ctx, query.SelectTodoByUsername, uname)
+	rows, err := conn.Db.QueryContext(ctx, query.TodoSelectByUsername, uname)
 	if err != nil {
 		return nil, err
 	}

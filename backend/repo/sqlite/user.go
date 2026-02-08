@@ -11,7 +11,7 @@ func (r *Repo) UserSelectPasswordByName(ctx context.Context, uname string) (stri
 	defer r.db.PutConn(conn)
 
 	var passwd string
-	row := conn.Db.QueryRowContext(ctx, query.SelectUserPasswordByName, uname)
+	row := conn.Db.QueryRowContext(ctx, query.UserSelectPasswordByName, uname)
 	if err := row.Scan(&passwd); err != nil {
 		return "", err
 	}
