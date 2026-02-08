@@ -9,7 +9,7 @@ import (
 	"github.com/rlapz/mmweb/util"
 )
 
-const bear = "Bearer"
+const bear = "Bearer "
 
 func (m *Middleware) AuthHandler(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -24,7 +24,7 @@ func (m *Middleware) AuthHandler(next http.Handler) http.Handler {
 			return
 		}
 
-		token := strings.ReplaceAll(auth, "Bearer ", "")
+		token := strings.ReplaceAll(auth, bear, "")
 
 		isOk, err := m.service.AuthTokenCheck(r.Context(), token)
 		if err != nil {
