@@ -8,7 +8,7 @@ import (
 	"github.com/rlapz/mmweb/util"
 )
 
-func (c *Controller) loginHandler(w http.ResponseWriter, r *http.Request) {
+func (c *controllerAuth) loginHandler(w http.ResponseWriter, r *http.Request) {
 	if !util.HttpMethodCheck(w, r, http.MethodPost) {
 		return
 	}

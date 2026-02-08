@@ -1,8 +1,6 @@
 package controller
 
 import (
-	"log"
-	"net/http"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -11,13 +9,11 @@ import (
 	"github.com/rlapz/mmweb/service"
 )
 
-type controllerItem struct {
-	path    string
-	handler http.HandlerFunc
+type controller struct {
+	service *service.Service
 }
 
-type Controller struct {
-	middleware *middleware.Middleware
+type controllerAuth struct {
 	service    *service.Service
 	signMethod *jwt.SigningMethodHMAC
 	signKey    []byte
@@ -25,27 +21,19 @@ type Controller struct {
 }
 
 func Init(cfg *config.Config, mid *middleware.Middleware, srv *service.Service) {
-	c := new(Controller)
-
-	c.middleware = mid
+	c := new(controller)
 	c.service = srv
-	c.signMethod = cfg.JwtSignMethod
-	c.signKey = cfg.JwtSignatureKey
-	c.loginExp = cfg.LoginExp
 
-	contItems := c.handlerList()
-	for i := range contItems {
-		itm := &contItems[i]
-		c.middleware.HandleFunc(itm.path, itm.handler)
-
-		log.Println("route:", itm.path)
-	}
+	mid.HandleFunc("/", c.indexHandler)
+	mid.HandleFunc("/todo", c.todoHandler)
 }
 
-func (c *Controller) handlerList() []controllerItem {
-	return []controllerItem{
-		{path: "/", handler: c.indexHandler},
-		{path: "/login", handler: c.loginHandler},
-		{path: "/todo", handler: c.todoHandler},
-	}
+func InitAuth(cfg *config.Config, mid *middleware.Middleware, srv *service.Service) {
+	ca := new(controllerAuth)
+	ca.service = srv
+	ca.signMethod = cfg.JwtSignMethod
+	ca.signKey = cfg.JwtSignatureKey
+	ca.loginExp = cfg.LoginExp
+
+	mid.HandleFunc("/login", ca.loginHandler)
 }

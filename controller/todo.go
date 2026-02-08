@@ -11,7 +11,7 @@ import (
 	"github.com/rlapz/mmweb/util"
 )
 
-func (c *Controller) todoHandler(w http.ResponseWriter, r *http.Request) {
+func (c *controller) todoHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
 		c.getTodoList(w, r)
@@ -26,7 +26,7 @@ func (c *Controller) todoHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (c *Controller) getTodoList(w http.ResponseWriter, r *http.Request) {
+func (c *controller) getTodoList(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query()
 	//id := query.Get("id")
 	// if id == "" -> show all todos, else -> show detail todo
@@ -45,7 +45,7 @@ func (c *Controller) getTodoList(w http.ResponseWriter, r *http.Request) {
 	util.HttpOk(w, "ok", body)
 }
 
-func (c *Controller) postTodoItem(w http.ResponseWriter, r *http.Request) {
+func (c *controller) postTodoItem(w http.ResponseWriter, r *http.Request) {
 	todo, err := util.HttpJsonParseBody[model.Todo](r.Body)
 	if err != nil {
 		util.HttpErrBadRequest(w, "")
@@ -77,13 +77,13 @@ func (c *Controller) postTodoItem(w http.ResponseWriter, r *http.Request) {
 	util.HttpCreated(w, "ok", todo)
 }
 
-func (c *Controller) putTodoItem(w http.ResponseWriter, r *http.Request) {
+func (c *controller) putTodoItem(w http.ResponseWriter, r *http.Request) {
 	util.HttpOk(w, "TODO", nil)
 
 	_ = r
 }
 
-func (c *Controller) deleteTodoItem(w http.ResponseWriter, r *http.Request) {
+func (c *controller) deleteTodoItem(w http.ResponseWriter, r *http.Request) {
 	util.HttpOk(w, "TODO", nil)
 
 	_ = r

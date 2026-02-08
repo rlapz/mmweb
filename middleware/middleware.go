@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -26,6 +27,11 @@ func New(cfg *config.Config) *Middleware {
 	m.addAuthExcluded()
 
 	return m
+}
+
+func (m *Middleware) HandleFunc(path string, handler http.HandlerFunc) {
+	m.ServeMux.HandleFunc(path, handler)
+	log.Println("path:", path)
 }
 
 func (m *Middleware) ServeHTTP(w http.ResponseWriter, r *http.Request) {

@@ -69,6 +69,7 @@ func run(cfg *config.Config) error {
 	srvv := service.New(repp)
 
 	controller.Init(cfg, mux, srvv)
+	controller.InitAuth(cfg, mux, srvv)
 
 	err = serve(mux, cfg)
 	if err != nil {

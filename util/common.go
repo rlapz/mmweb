@@ -46,10 +46,16 @@ func HashPasswordVerify(hash, plain string) bool {
 	return false
 }
 
-func Cond[T any](cnd bool, expected, alt T) T {
-	if cnd {
+func Cnd[T any](cond bool, expected, alt T) T {
+	if cond {
 		return expected
 	}
 
 	return alt
+}
+
+func Cnd2[T any](cond bool, expected T, ret *T) {
+	if cond {
+		*ret = expected
+	}
 }
