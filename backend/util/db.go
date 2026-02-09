@@ -59,7 +59,9 @@ func dbTransactionTryExecHandler(ctx context.Context, trx *sql.Tx, args ...any) 
 			break
 		}
 
-		ContextSleep(ctx, config.DB_TRY_WAIT)
+		if ContextSleep(ctx, config.DB_TRY_WAIT) != nil {
+			break
+		}
 	}
 
 	return err
