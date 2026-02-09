@@ -1,8 +1,8 @@
 package controller
 
 import (
-	"context"
 	"errors"
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -29,17 +29,8 @@ func (c *controller) todoHandler(w http.ResponseWriter, r *http.Request) {
 func (c *controller) getTodo(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query()
 	id := query.Get("id")
-
-	ctx := r.Context()
-	claims := util.ContextGetJwtClaims(ctx)
-	uname, err := claims.GetIssuer()
-	if err != nil {
-		util.HttpErrInternal(w, err, "failed to get claims context")
-		return
-	}
-
 	if id == "" {
-		c.getTodoList(ctx, w, uname)
+		c.getTodoList(w, r)
 		return
 	}
 
@@ -49,19 +40,37 @@ func (c *controller) getTodo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data, err := c.service.GetTodoById(ctx, int32(idInt))
+	data, err := c.service.GetTodoById(r.Context(), int32(idInt))
 	if err != nil {
 		util.HttpErrInternal(w, err, "failed to get todo")
+		return
+	}
+
+	if data == nil {
+		util.HttpErrNotFound(w, fmt.Sprintf("no data with 'id = %d'", idInt))
 		return
 	}
 
 	util.HttpOk(w, "ok", data)
 }
 
-func (c *controller) getTodoList(ctx context.Context, w http.ResponseWriter, uname string) {
+func (c *controller) getTodoList(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	claims := util.ContextGetJwtClaims(ctx)
+	uname, err := claims.GetIssuer()
+	if err != nil {
+		util.HttpErrInternal(w, err, "failed to get claims context")
+		return
+	}
+
 	list, err := c.service.GetTodoByUsername(ctx, uname)
 	if err != nil {
 		util.HttpErrInternal(w, err, "failed to get todo list")
+		return
+	}
+
+	if len(list) == 0 {
+		util.HttpErrNotFound(w, "no data")
 		return
 	}
 
