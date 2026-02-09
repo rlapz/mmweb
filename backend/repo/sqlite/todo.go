@@ -18,7 +18,7 @@ func (r *Repo) TodoInsert(ctx context.Context, uname string, todo *model.Todo) e
 
 	todo.CreatedAt = time.Now()
 
-	aff, err := util.DbTransactionTryExec(ctx, conn.Db, query.TodoInsert, todo.Title, todo.Description,
+	aff, err := util.DbTxTryExec(ctx, conn.Db, query.TodoInsert, todo.Title, todo.Description,
 		todo.Flags, todo.CreatedAt, uname)
 	if err != nil {
 		return err

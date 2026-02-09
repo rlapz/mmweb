@@ -7,10 +7,9 @@ import (
 	"github.com/rlapz/mmweb/config"
 )
 
-func DbTransactionExec(ctx context.Context, db *sql.DB,
-	handler func(ctx context.Context, trx *sql.Tx, args ...any) error,
-	args ...any) error {
+type DbTxExecHandler func(ctx context.Context, trx *sql.Tx, args ...any) error
 
+func DbTxExec(ctx context.Context, db *sql.DB, handler DbTxExecHandler, args ...any) error {
 	tx, err := db.BeginTx(ctx, nil)
 	if err != nil {
 		return err
@@ -35,17 +34,17 @@ func DbTransactionExec(ctx context.Context, db *sql.DB,
 	return err
 }
 
-func DbTransactionTryExec(ctx context.Context, conn *sql.DB, query string, args ...any) (int64, error) {
+func DbTxTryExec(ctx context.Context, conn *sql.DB, query string, args ...any) (int64, error) {
 	var rowsCount int64
 	xargs := make([]any, 0, 2+len(args))
 	xargs = append(xargs, &rowsCount, query)
 	xargs = append(xargs, args...)
 
-	err := DbTransactionExec(ctx, conn, dbTransactionTryExecHandler, xargs...)
+	err := DbTxExec(ctx, conn, dbTxTryExecHandler, xargs...)
 	return rowsCount, err
 }
 
-func dbTransactionTryExecHandler(ctx context.Context, trx *sql.Tx, args ...any) error {
+func dbTxTryExecHandler(ctx context.Context, trx *sql.Tx, args ...any) error {
 	rc := args[0].(*int64)
 	query := args[1].(string)
 	xargs := args[2:]

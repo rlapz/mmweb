@@ -12,7 +12,7 @@ func (r *Repo) AuthTokenInvalidInsert(ctx context.Context, token string) error {
 	conn := r.db.GetConn()
 	defer r.db.PutConn(conn)
 
-	count, err := util.DbTransactionTryExec(ctx, conn.Db, query.AuthTokenInvalidInsert, token)
+	count, err := util.DbTxTryExec(ctx, conn.Db, query.AuthTokenInvalidInsert, token)
 	if err != nil {
 		return err
 	}
