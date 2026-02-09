@@ -33,6 +33,15 @@ func ContextGetJwtClaims(ctx context.Context) jwt.MapClaims {
 	return ctx.Value(config.CLAIMS_CONTEXT_NAME).(jwt.MapClaims)
 }
 
+func ContextSleep(ctx context.Context, dur time.Duration) error {
+	select {
+	case <-time.After(dur):
+		return nil
+	case <-ctx.Done():
+		return ctx.Err()
+	}
+}
+
 func HashPasswordGenerate(plain string) (string, error) {
 	b, err := bcrypt.GenerateFromPassword([]byte(plain), bcrypt.DefaultCost)
 	return string(b), err

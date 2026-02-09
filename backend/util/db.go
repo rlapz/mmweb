@@ -3,7 +3,6 @@ package util
 import (
 	"context"
 	"database/sql"
-	"time"
 
 	"github.com/rlapz/mmweb/config"
 )
@@ -60,7 +59,7 @@ func dbTransactionTryExecHandler(ctx context.Context, trx *sql.Tx, args ...any) 
 			break
 		}
 
-		time.Sleep(config.DB_TRY_WAIT)
+		ContextSleep(ctx, config.DB_TRY_WAIT)
 	}
 
 	return err
