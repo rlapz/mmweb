@@ -26,6 +26,7 @@ func Init(cfg *config.Config, mid *middleware.Middleware, srv *service.Service) 
 
 	mid.AddHandler("/", c.indexHandler, middleware.FLAG_AUTH_EXCLUDED)
 	mid.AddHandler("/todo", c.todoHandler, 0)
+	mid.AddHandler("/blog", c.blogHandler, 0)
 }
 
 func InitAuth(cfg *config.Config, mid *middleware.Middleware, srv *service.Service) {
