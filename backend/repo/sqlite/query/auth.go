@@ -1,12 +1,18 @@
 package query
 
-const AuthTokenInvalidInsert = `
-	INSERT INTO t_auth_token_invalid(value)
-	VALUES (?)
+const AuthTokenInsert = `
+	insert into t_auth(token, flags)
+	values(?, ?);
 `
 
-const AuthTokenInvalidCheck = `
-	SELECT 1
-	FROM t_auth_token_invalid
-	WHERE (value = ?)
+const AuthTokenUpdateFlags = `
+	update t_auth
+		set flags = ?
+	where (token = ?);
+`
+
+const AuthTokenSelectFlags = `
+	select flags
+	from t_auth
+	where (token = ?);
 `

@@ -7,18 +7,39 @@ import (
 	"github.com/rlapz/mmweb/model"
 )
 
-func (s *Service) AddTodo(ctx context.Context, uname string, todo *model.Todo) error {
-	if todo.Title == "" {
+func (s *Service) AddTodo(ctx context.Context, todo *model.Todo, uname string) error {
+	// TODO: validate fields
+	if todo.Label == "" {
 		return errorx.DataInvalid
 	}
 
-	return s.repo.TodoInsert(ctx, uname, todo)
+	id, err := s.repo.UserSelectIdByName(ctx, uname)
+	if err != nil {
+		return err
+	}
+
+	return s.repo.TodoInsert(ctx, todo, id)
 }
 
-func (s *Service) GetTodoById(ctx context.Context, id int32) (*model.Todo, error) {
+func (s *Service) AddTodoItems(ctx context.Context, id int32, items []model.TodoItem) error {
+	// TODO: validate fields
+
+	return s.repo.TodoInsertItems(ctx, id, items)
+}
+
+func (s *Service) GetTodo(ctx context.Context, id int32) (*model.Todo, error) {
 	return s.repo.TodoSelectById(ctx, id)
 }
 
-func (s *Service) GetTodoByUsername(ctx context.Context, uname string) ([]model.Todo, error) {
-	return s.repo.TodoSelectByUsername(ctx, uname)
+func (s *Service) GetTodoList(ctx context.Context, uname string) ([]model.Todo, error) {
+	id, err := s.repo.UserSelectIdByName(ctx, uname)
+	if err != nil {
+		return nil, err
+	}
+
+	return s.repo.TodoSelectByUserId(ctx, id)
+}
+
+func (s *Service) GetTodoItems(ctx context.Context, id int32) ([]model.TodoItem, error) {
+	return s.repo.TodoSelectItemsById(ctx, id)
 }

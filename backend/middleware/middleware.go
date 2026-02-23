@@ -4,8 +4,6 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/golang-jwt/jwt/v5"
-	"github.com/rlapz/mmweb/config"
 	"github.com/rlapz/mmweb/service"
 	"github.com/rlapz/mmweb/util"
 )
@@ -18,18 +16,14 @@ const (
 type Middleware struct {
 	http.ServeMux
 
-	signMethod   *jwt.SigningMethodHMAC
-	signKey      []byte
 	authExcluded util.Set
 	items        []func(next http.Handler) http.Handler
 	service      *service.Service
 }
 
-func New(cfg *config.Config, srv *service.Service) *Middleware {
+func New(srv *service.Service) *Middleware {
 	m := new(Middleware)
 
-	m.signMethod = cfg.JwtSignMethod
-	m.signKey = cfg.JwtSignatureKey
 	m.service = srv
 	m.authExcluded = util.SetNew()
 	m.addItems()

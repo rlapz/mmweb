@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"time"
 
 	"github.com/rlapz/mmweb/errorx"
 	"github.com/rlapz/mmweb/model"
@@ -12,65 +11,82 @@ import (
 	"github.com/rlapz/mmweb/util"
 )
 
-func (r *Repo) TodoInsert(ctx context.Context, uname string, todo *model.Todo) error {
+func (r *Repo) TodoInsert(ctx context.Context, todo *model.Todo, userId int32) error {
 	conn := r.db.GetConn()
 	defer r.db.PutConn(conn)
 
-	todo.CreatedAt = time.Now()
+	return util.DbTxExec(ctx, conn.Db, func(ctx context.Context, trx *sql.Tx, args ...any) error {
+		res, err := trx.ExecContext(ctx, query.TodoInsert, userId, todo.Label, todo.CreatedAt)
+		if err != nil {
+			return err
+		}
 
-	aff, err := util.DbTxTryExec(ctx, conn.Db, query.TodoInsert, todo.Title, todo.Description,
-		todo.Flags, todo.CreatedAt, uname)
+		aff, err := res.RowsAffected()
+		if err != nil {
+			return err
+		}
+
+		if aff == 0 {
+			return errorx.NoDataSaved
+		}
+		return nil
+	})
+}
+
+func (r *Repo) TodoInsertItems(ctx context.Context, id int32, items []model.TodoItem) error {
+	conn := r.db.GetConn()
+	defer r.db.PutConn(conn)
+
+	return util.DbTxExec(ctx, conn.Db, func(ctx context.Context, trx *sql.Tx, args ...any) error {
+		// TODO: batch insert
+		for i := range items {
+			u := &items[i]
+			res, err := trx.ExecContext(ctx, query.TodoInsert, id, u.Title, u.Description,
+				u.Flags, u.CreatedAt)
+			if err != nil {
+				return err
+			}
+
+			aff, err := res.RowsAffected()
+			if err != nil {
+				return err
+			}
+
+			if aff == 0 {
+				return errorx.NoDataSaved
+			}
+		}
+
+		return nil
+	})
+}
+
+func (r *Repo) TodoIsExists(ctx context.Context, label string, userId int32) (bool, error) {
+	conn := r.db.GetConn()
+	defer r.db.PutConn(conn)
+
+	var ok bool
+	row := conn.Db.QueryRowContext(ctx, query.TodoIsExists, label, userId)
+	err := row.Scan(&ok)
 	if err != nil {
-		return err
+		if errors.Is(err, sql.ErrNoRows) {
+			return false, nil
+		}
+
+		return false, err
 	}
 
-	if aff == 0 {
-		return errorx.NoDataSaved
-	}
-
-	return nil
+	return true, err
 }
 
 func (r *Repo) TodoSelectById(ctx context.Context, id int32) (*model.Todo, error) {
-	conn := r.db.GetConn()
-	defer r.db.PutConn(conn)
-
-	ret := new(model.Todo)
-	row := conn.Db.QueryRowContext(ctx, query.TodoSelectById, id)
-	err := row.Scan(&ret.Id, &ret.IdUser, &ret.Title, &ret.Description, &ret.Flags,
-		&ret.CreatedAt, &ret.CreatedBy)
-	if errors.Is(err, sql.ErrNoRows) {
-		return nil, nil
-	}
-
-	return ret, err
+	return nil, nil
 }
 
-func (r *Repo) TodoSelectByUsername(ctx context.Context, uname string) ([]model.Todo, error) {
-	conn := r.db.GetConn()
-	defer r.db.PutConn(conn)
+func (r *Repo) TodoSelectByUserId(ctx context.Context, id int32) ([]model.Todo, error) {
+	return nil, nil
+}
 
-	rows, err := conn.Db.QueryContext(ctx, query.TodoSelectByUsername, uname)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	var ret []model.Todo
-	for rows.Next() {
-		var tmp model.Todo
-		err := rows.Scan(&tmp.Id, &tmp.IdUser, &tmp.Title, &tmp.Description,
-			&tmp.Flags, &tmp.CreatedAt, &tmp.CreatedBy)
-		if errors.Is(err, sql.ErrNoRows) {
-			return nil, nil
-		}
-
-		if err != nil {
-			return nil, err
-		}
-
-		ret = append(ret, tmp)
-	}
-
-	return ret, nil
+func (r *Repo) TodoSelectItemsById(ctx context.Context, id int32) ([]model.TodoItem, error) {
+	return nil, nil
 }

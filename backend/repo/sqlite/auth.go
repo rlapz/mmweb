@@ -8,11 +8,11 @@ import (
 	"github.com/rlapz/mmweb/util"
 )
 
-func (r *Repo) AuthTokenInvalidInsert(ctx context.Context, token string) error {
+func (r *Repo) AuthTokenInsert(ctx context.Context, token string, flags int) error {
 	conn := r.db.GetConn()
 	defer r.db.PutConn(conn)
 
-	count, err := util.DbTxTryExec(ctx, conn.Db, query.AuthTokenInvalidInsert, token)
+	count, err := util.DbTxTryExec(ctx, conn.Db, query.AuthTokenInsert, token, flags)
 	if err != nil {
 		return err
 	}
@@ -24,11 +24,31 @@ func (r *Repo) AuthTokenInvalidInsert(ctx context.Context, token string) error {
 	return nil
 }
 
-func (r *Repo) AuthTokenInvalidCheck(ctx context.Context, token string) error {
+func (r *Repo) AuthTokenUpdateFlags(ctx context.Context, token string, flags int) error {
 	conn := r.db.GetConn()
 	defer r.db.PutConn(conn)
 
-	var ret bool
-	row := conn.Db.QueryRowContext(ctx, query.AuthTokenInvalidCheck, token)
-	return row.Scan(&ret)
+	count, err := util.DbTxTryExec(ctx, conn.Db, query.AuthTokenUpdateFlags, flags, token)
+	if err != nil {
+		return err
+	}
+
+	if count == 0 {
+		return errorx.NoDataUpdated
+	}
+
+	return nil
+}
+
+func (r *Repo) AuthTokenSelectFlags(ctx context.Context, token string) (int, error) {
+	conn := r.db.GetConn()
+	defer r.db.PutConn(conn)
+
+	var ret int
+	row := conn.Db.QueryRowContext(ctx, query.AuthTokenSelectFlags, token)
+	if err := row.Scan(&ret); err != nil {
+		return -1, err
+	}
+
+	return ret, nil
 }

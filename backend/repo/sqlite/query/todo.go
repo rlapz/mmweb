@@ -1,22 +1,18 @@
 package query
 
 const TodoInsert = `
-	INSERT INTO t_todo(id_user, title, description, flags, created_at, created_by)
-	SELECT a.id, ?, ?, ?, ?, a.id
-	FROM t_user AS a
-	WHERE (a.name = ?)
-	LIMIT 1
+	insert into t_todo(id_user, label, created_at)
+	values(?, ?, ?);
 `
 
-const TodoSelectById = `
-	SELECT id, id_user, title, description, flags, created_at, created_by
-	FROM t_todo
-	WHERE (id = ?)
+const TodoInsertItems = `
+	insert into t_todo_item(id_todo, title, description, flags, created_at)
+	values(?, ?, ?, ?, ?)
 `
 
-const TodoSelectByUsername = `
-	SELECT a.id, a.id_user, a.title, a.description, a.flags, a.created_at, a.created_by
-	FROM t_todo AS a
-	JOIN t_user AS b ON (a.id_user = b.id)
-	WHERE (b.name = ?)
+const TodoIsExists = `
+	select 1
+	from t_todo
+	where (label = ?) and (id_user = ?)
+	limit 1;
 `

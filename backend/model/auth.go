@@ -1,6 +1,6 @@
 package model
 
-type TokenInvalid struct {
-	Id    int32  `json:"id"`
-	Value string `json:"value"`
-}
+const (
+	AUTH_FLAG_LOGGED_IN = iota
+	AUTH_FLAG_LOGGED_OUT
+)

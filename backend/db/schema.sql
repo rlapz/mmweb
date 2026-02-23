@@ -1,3 +1,4 @@
+-- sqlite ver 3
 
 ----------
 -- USER --
@@ -39,15 +40,20 @@ CREATE TABLE "t_user_detail_history" (
 	FOREIGN KEY("id_user_detail") REFERENCES "t_user_detail"("id")
 );
 
--- always insert
-CREATE TABLE "t_user_auth" (
+
+----------
+-- AUTH --
+----------
+/*
+ * flags: 0 -> logged in
+ *        1 -> logged out
+ */
+-- always insert, can be updated
+CREATE TABLE "t_auth" (
 	"id"	        INTEGER NOT NULL,
-	"id_user"	INTEGER NOT NULL,
-	"token"	        TEXT NOT NULL,
-        "flags"         INTEGER NOT NULL DEFAULT 0,
-	"created_at"	TIMESTAMP NOT NULL,
-	PRIMARY KEY("id" AUTOINCREMENT),
-	FOREIGN KEY("id_user") REFERENCES "t_user"("id")
+	"token"	        TEXT UNIQUE NOT NULL,
+	"flags"         INTEGER NOT NULL,
+	PRIMARY KEY("id" AUTOINCREMENT)
 );
 
 
@@ -99,3 +105,9 @@ CREATE TABLE "t_todo_item_history" (
 	PRIMARY KEY("id" AUTOINCREMENT),
 	FOREIGN KEY("id_todo_item") REFERENCES "t_todo_item"("id")
 );
+
+
+----------
+-- BLOG --
+----------
+

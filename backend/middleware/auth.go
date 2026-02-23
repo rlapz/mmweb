@@ -4,7 +4,6 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/golang-jwt/jwt/v5"
 	"github.com/rlapz/mmweb/errorx"
 	"github.com/rlapz/mmweb/util"
 )
@@ -26,7 +25,7 @@ func (m *Middleware) AuthHandler(next http.Handler) http.Handler {
 
 		token := strings.ReplaceAll(auth, bear, "")
 
-		isOk, err := m.service.AuthTokenCheck(r.Context(), token)
+		isOk, err := m.service.AuthVerify(r.Context(), token)
 		if err != nil {
 			util.HttpErrInternal(w, err, "failed to check token")
 			return
@@ -37,27 +36,12 @@ func (m *Middleware) AuthHandler(next http.Handler) http.Handler {
 			return
 		}
 
-		tokenSigned, err := jwt.Parse(token, func(tok *jwt.Token) (any, error) {
-			mth, ok := tok.Method.(*jwt.SigningMethodHMAC)
-			if !ok || mth != m.signMethod {
-				return nil, errorx.AuthSignMethod
-			}
-
-			return m.signKey, nil
-		})
-
+		claims, err := m.service.AuthToken(token)
 		if err != nil {
 			util.HttpErrUnauthorized(w, err.Error())
 			return
 		}
 
-		claims, ok := tokenSigned.Claims.(jwt.MapClaims)
-		if !ok || !tokenSigned.Valid {
-			util.HttpErrUnauthorized(w, errorx.AuthTokenClaims.Error())
-			return
-		}
-
-		claims["token"] = token
 		util.ContextSetJwtClaims(&r, claims)
 
 		next.ServeHTTP(w, r)

@@ -63,11 +63,10 @@ func run(cfg *config.Config) error {
 	defer dbb.Destory()
 
 	repp := repoSqlite.New(dbb)
-	srvv := service.New(repp)
+	srvv := service.New(cfg, repp)
 
-	mid := middleware.New(cfg, srvv)
-	controller.Init(cfg, mid, srvv)
-	controller.InitAuth(cfg, mid, srvv)
+	mid := middleware.New(srvv)
+	controller.Init(mid, srvv)
 
 	err = serve(mid, cfg)
 	if err != nil {

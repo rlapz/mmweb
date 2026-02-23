@@ -2,9 +2,27 @@ package sqlite
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 
+	"github.com/rlapz/mmweb/errorx"
+	"github.com/rlapz/mmweb/model"
 	"github.com/rlapz/mmweb/repo/sqlite/query"
+	"github.com/rlapz/mmweb/util"
 )
+
+func (r *Repo) UserSelectIdByName(ctx context.Context, uname string) (int32, error) {
+	conn := r.db.GetConn()
+	defer r.db.PutConn(conn)
+
+	var id int32
+	row := conn.Db.QueryRowContext(ctx, query.UserSelectIdByName, uname)
+	if err := row.Scan(&id); err != nil {
+		return 0, err
+	}
+
+	return id, nil
+}
 
 func (r *Repo) UserSelectPasswordByName(ctx context.Context, uname string) (string, error) {
 	conn := r.db.GetConn()
@@ -17,4 +35,68 @@ func (r *Repo) UserSelectPasswordByName(ctx context.Context, uname string) (stri
 	}
 
 	return passwd, nil
+}
+
+func (r *Repo) UserInsert(ctx context.Context, user *model.User) error {
+	conn := r.db.GetConn()
+	defer r.db.PutConn(conn)
+
+	return util.DbTxExec(ctx, conn.Db, func(ctx context.Context, trx *sql.Tx, args ...any) error {
+		now := util.Now()
+
+		res, err := trx.ExecContext(ctx, query.UserInsert, user.Name, now)
+		if err != nil {
+			return err
+		}
+
+		aff, err := res.RowsAffected()
+		if err != nil {
+			return err
+		}
+
+		if aff == 0 {
+			return errorx.NoDataSaved
+		}
+
+		id, err := res.LastInsertId()
+		if err != nil {
+			return err
+		}
+
+		res, err = trx.ExecContext(ctx, query.UserDetailInsert, int(id),
+			user.FirstName, user.LastName, user.Email, user.Password,
+			user.Flags, now)
+		if err != nil {
+			return err
+		}
+
+		aff, err = res.RowsAffected()
+		if err != nil {
+			return err
+		}
+
+		if aff == 0 {
+			return errorx.NoDataSaved
+		}
+
+		return nil
+	})
+}
+
+func (r *Repo) UserIsExists(ctx context.Context, uname string) (bool, error) {
+	conn := r.db.GetConn()
+	defer r.db.PutConn(conn)
+
+	var ok bool
+	row := conn.Db.QueryRowContext(ctx, query.UserIsExists, uname)
+	err := row.Scan(&ok)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return false, nil
+		}
+
+		return false, err
+	}
+
+	return true, err
 }

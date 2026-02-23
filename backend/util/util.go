@@ -24,7 +24,7 @@ func JwtMakeSignedToken(method *jwt.SigningMethodHMAC, key []byte, issuer string
 	return token.SignedString(key)
 }
 
-func ContextSetJwtClaims(r **http.Request, cl jwt.Claims) {
+func ContextSetJwtClaims(r **http.Request, cl jwt.MapClaims) {
 	ctx := context.WithValue(context.Background(), config.CLAIMS_CONTEXT_NAME, cl)
 	*r = (*r).WithContext(ctx)
 }
@@ -53,6 +53,10 @@ func HashPasswordVerify(hash, plain string) bool {
 	}
 
 	return false
+}
+
+func Now() int64 {
+	return time.Now().Unix()
 }
 
 func Cnd[T any](cond bool, expected, alt T) T {

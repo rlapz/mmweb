@@ -1,13 +1,25 @@
 package service
 
-import "github.com/rlapz/mmweb/repo"
+import (
+	"time"
+
+	"github.com/golang-jwt/jwt/v5"
+	"github.com/rlapz/mmweb/config"
+	"github.com/rlapz/mmweb/repo"
+)
 
 type Service struct {
-	repo repo.Repo
+	signMethod *jwt.SigningMethodHMAC
+	signKey    []byte
+	loginExp   time.Duration
+	repo       repo.Repo
 }
 
-func New(r repo.Repo) *Service {
+func New(cfg *config.Config, r repo.Repo) *Service {
 	return &Service{
-		repo: r,
+		signMethod: cfg.JwtSignMethod,
+		signKey:    cfg.JwtSignatureKey,
+		loginExp:   cfg.LoginExp,
+		repo:       r,
 	}
 }

@@ -8,6 +8,8 @@ var (
 	AuthTokenClaims       = errors.New("auth: failed to claim token")
 	AuthInvalidCredential = errors.New("auth: invalid credential")
 
-	NoDataSaved = errors.New("no data saved")
-	DataInvalid = errors.New("data invalid")
+	NoDataSaved   = errors.New("no data saved")
+	NoDataUpdated = errors.New("no data updated")
+	DataInvalid   = errors.New("data invalid")
+	DataExists    = errors.New("data exists")
 )
