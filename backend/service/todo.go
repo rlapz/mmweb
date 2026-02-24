@@ -24,7 +24,12 @@ func (s *Service) AddTodo(ctx context.Context, todo *model.Todo, uname string) e
 func (s *Service) AddTodoItems(ctx context.Context, id int32, items []model.TodoItem) error {
 	// TODO: validate fields
 
-	return s.repo.TodoInsertItems(ctx, id, items)
+	for i := range items {
+		v := &items[i]
+		v.IdTodo = id
+	}
+
+	return s.repo.TodoInsertItems(ctx, items)
 }
 
 func (s *Service) GetTodo(ctx context.Context, id int32) (*model.Todo, error) {

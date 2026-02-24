@@ -15,36 +15,35 @@ func (r *Repo) TodoInsert(ctx context.Context, todo *model.Todo, userId int32) e
 	conn := r.db.GetConn()
 	defer r.db.PutConn(conn)
 
-	_, err := util.DbTxExec(ctx, conn.Db, query.TodoInsert, userId, todo.Label, todo.CreatedAt)
+	_, err := conn.Db.ExecContext(ctx, query.TodoInsert, userId, todo.Label, todo.CreatedAt)
 	return err
 }
 
-func (r *Repo) TodoInsertItems(ctx context.Context, id int32, items []model.TodoItem) error {
+func (r *Repo) TodoInsertItems(ctx context.Context, items []model.TodoItem) error {
 	conn := r.db.GetConn()
 	defer r.db.PutConn(conn)
 
-	return util.DbTxExecWithHandler(ctx, conn.Db, func(ctx context.Context, trx *sql.Tx, args ...any) error {
-		// TODO: batch insert
-		for i := range items {
-			u := &items[i]
-			res, err := trx.ExecContext(ctx, query.TodoInsert, id, u.Title, u.Description,
-				u.Flags, u.CreatedAt)
-			if err != nil {
-				return err
-			}
+	plcs, slcs, err := util.SqlBatch(items)
+	if err != nil {
+		return err
+	}
 
-			aff, err := res.RowsAffected()
-			if err != nil {
-				return err
-			}
+	qq := query.TodoInsertItemsBatch + plcs
+	res, err := conn.Db.ExecContext(ctx, qq, slcs...)
+	if err != nil {
+		return err
+	}
 
-			if aff == 0 {
-				return errorx.NoDataSaved
-			}
-		}
+	aff, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
 
-		return nil
-	})
+	if aff == 0 {
+		return errorx.NoDataSaved
+	}
+
+	return err
 }
 
 func (r *Repo) TodoIsExists(ctx context.Context, label string, userId int32) (bool, error) {

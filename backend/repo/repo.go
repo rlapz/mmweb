@@ -13,7 +13,7 @@ type Repo interface {
 	UserIsExists(ctx context.Context, uname string) (bool, error)
 
 	TodoInsert(ctx context.Context, todo *model.Todo, userId int32) error
-	TodoInsertItems(ctx context.Context, id int32, items []model.TodoItem) error
+	TodoInsertItems(ctx context.Context, items []model.TodoItem) error
 	TodoIsExists(ctx context.Context, label string, userId int32) (bool, error)
 	TodoSelectById(ctx context.Context, id int32) (*model.Todo, error)
 	TodoSelectByUserId(ctx context.Context, id int32) ([]model.Todo, error)
