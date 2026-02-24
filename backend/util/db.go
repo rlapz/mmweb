@@ -7,37 +7,55 @@ import (
 	"github.com/rlapz/mmweb/config"
 )
 
-type DbTxExecHandler func(ctx context.Context, trx *sql.Tx, args ...any) error
+type DbTxExecHandler func(ctx context.Context, tx *sql.Tx, args ...any) error
 
-func DbTxExec(ctx context.Context, db *sql.DB, query string, args ...any) (int64, error) {
-	var ret int64
-	err := DbTxExecWithHandler(ctx, db, func(ctx context.Context, trx *sql.Tx, _ ...any) error {
-		res, err := trx.ExecContext(ctx, query, args...)
+func DbTxTryPartialExec(ctx context.Context, tx *sql.Tx, query string, args ...any) (sql.Result, error) {
+	var err error
+	var res sql.Result
+	for range config.DB_TRY_MAX {
+		res, err = tx.ExecContext(ctx, query, args...)
+		if err == nil {
+			// OK
+			break
+		}
+
+		err = ContextSleep(ctx, config.DB_TRY_WAIT)
+		if err != nil {
+			break
+		}
+	}
+
+	return res, err
+}
+
+func DbTxExec(ctx context.Context, db *sql.DB, query string, args ...any) (sql.Result, error) {
+	var ret sql.Result
+	var err error
+	err = DbTxExecWithHandler(ctx, db, func(ctx context.Context, tx *sql.Tx, _ ...any) error {
+		ret, err = tx.ExecContext(ctx, query, args...)
 		if err != nil {
 			return err
 		}
 
-		ret, err = res.RowsAffected()
-		return err
+		return nil
 	})
 
 	return ret, err
 }
 
-func DbTxTryExec(ctx context.Context, conn *sql.DB, query string, args ...any) (int64, error) {
-	var ret int64
-	err := DbTxExecWithHandler(ctx, conn, func(ctx context.Context, trx *sql.Tx, _ ...any) error {
-		var err error
-		var res sql.Result
+func DbTxTryExec(ctx context.Context, conn *sql.DB, query string, args ...any) (sql.Result, error) {
+	var ret sql.Result
+	var err error
+	err = DbTxExecWithHandler(ctx, conn, func(ctx context.Context, tx *sql.Tx, _ ...any) error {
 		for range config.DB_TRY_MAX {
-			res, err = trx.ExecContext(ctx, query, args...)
+			ret, err = tx.ExecContext(ctx, query, args...)
 			if err == nil {
-				ret, err = res.RowsAffected()
-				break
+				return nil
 			}
 
-			if ContextSleep(ctx, config.DB_TRY_WAIT) != nil {
-				break
+			err = ContextSleep(ctx, config.DB_TRY_WAIT)
+			if err != nil {
+				return err
 			}
 		}
 
@@ -70,4 +88,42 @@ func DbTxExecWithHandler(ctx context.Context, db *sql.DB, handler DbTxExecHandle
 	// don't forget to update err variable
 	err = tx.Commit()
 	return err
+}
+
+func DbTryRowsAffected(ctx context.Context, res sql.Result) (int64, error) {
+	var ret int64
+	var err error
+	for range config.DB_TRY_MAX {
+		ret, err = res.RowsAffected()
+		if err == nil {
+			// OK
+			break
+		}
+
+		err = ContextSleep(ctx, config.DB_TRY_WAIT)
+		if err != nil {
+			break
+		}
+	}
+
+	return ret, err
+}
+
+func DbTryLastInsertId(ctx context.Context, res sql.Result) (int64, error) {
+	var ret int64
+	var err error
+	for range config.DB_TRY_MAX {
+		ret, err = res.LastInsertId()
+		if err == nil {
+			// OK
+			break
+		}
+
+		err = ContextSleep(ctx, config.DB_TRY_WAIT)
+		if err != nil {
+			break
+		}
+	}
+
+	return ret, err
 }

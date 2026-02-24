@@ -41,15 +41,14 @@ func (r *Repo) UserInsert(ctx context.Context, user *model.User) error {
 	conn := r.db.GetConn()
 	defer r.db.PutConn(conn)
 
-	return util.DbTxExecWithHandler(ctx, conn.Db, func(ctx context.Context, trx *sql.Tx, args ...any) error {
-		now := util.Now()
-
-		res, err := trx.ExecContext(ctx, query.UserInsert, user.Name, now)
+	now := util.Now()
+	err := util.DbTxExecWithHandler(ctx, conn.Db, func(ctx context.Context, tx *sql.Tx, args ...any) error {
+		res, err := util.DbTxTryPartialExec(ctx, tx, query.UserInsert, user.Name, now)
 		if err != nil {
 			return err
 		}
 
-		aff, err := res.RowsAffected()
+		aff, err := util.DbTryRowsAffected(ctx, res)
 		if err != nil {
 			return err
 		}
@@ -58,19 +57,19 @@ func (r *Repo) UserInsert(ctx context.Context, user *model.User) error {
 			return errorx.NoDataSaved
 		}
 
-		id, err := res.LastInsertId()
+		id, err := util.DbTryLastInsertId(ctx, res)
 		if err != nil {
 			return err
 		}
 
-		res, err = trx.ExecContext(ctx, query.UserDetailInsert, int(id),
-			user.FirstName, user.LastName, user.Email, user.Password,
-			user.Flags, now)
+		res, err = util.DbTxTryPartialExec(ctx, tx, query.UserDetailInsert, int(id),
+			user.FirstName, user.LastName, user.Email, user.Password, user.Flags,
+			now)
 		if err != nil {
 			return err
 		}
 
-		aff, err = res.RowsAffected()
+		aff, err = util.DbTryRowsAffected(ctx, res)
 		if err != nil {
 			return err
 		}
@@ -81,6 +80,8 @@ func (r *Repo) UserInsert(ctx context.Context, user *model.User) error {
 
 		return nil
 	})
+
+	return err
 }
 
 func (r *Repo) UserIsExists(ctx context.Context, uname string) (bool, error) {

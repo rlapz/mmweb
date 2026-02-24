@@ -12,7 +12,12 @@ func (r *Repo) AuthTokenInsert(ctx context.Context, token string, flags int) err
 	conn := r.db.GetConn()
 	defer r.db.PutConn(conn)
 
-	count, err := util.DbTxTryExec(ctx, conn.Db, query.AuthTokenInsert, token, flags)
+	res, err := util.DbTxTryExec(ctx, conn.Db, query.AuthTokenInsert, token, flags)
+	if err != nil {
+		return err
+	}
+
+	count, err := res.RowsAffected()
 	if err != nil {
 		return err
 	}
@@ -28,7 +33,12 @@ func (r *Repo) AuthTokenUpdateFlags(ctx context.Context, token string, flags int
 	conn := r.db.GetConn()
 	defer r.db.PutConn(conn)
 
-	count, err := util.DbTxTryExec(ctx, conn.Db, query.AuthTokenUpdateFlags, flags, token)
+	res, err := util.DbTxTryExec(ctx, conn.Db, query.AuthTokenUpdateFlags, flags, token)
+	if err != nil {
+		return err
+	}
+
+	count, err := res.RowsAffected()
 	if err != nil {
 		return err
 	}
