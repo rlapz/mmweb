@@ -15,29 +15,15 @@ func (r *Repo) TodoInsert(ctx context.Context, todo *model.Todo, userId int32) e
 	conn := r.db.GetConn()
 	defer r.db.PutConn(conn)
 
-	return util.DbTxExec(ctx, conn.Db, func(ctx context.Context, trx *sql.Tx, args ...any) error {
-		res, err := trx.ExecContext(ctx, query.TodoInsert, userId, todo.Label, todo.CreatedAt)
-		if err != nil {
-			return err
-		}
-
-		aff, err := res.RowsAffected()
-		if err != nil {
-			return err
-		}
-
-		if aff == 0 {
-			return errorx.NoDataSaved
-		}
-		return nil
-	})
+	_, err := util.DbTxExec(ctx, conn.Db, query.TodoInsert, userId, todo.Label, todo.CreatedAt)
+	return err
 }
 
 func (r *Repo) TodoInsertItems(ctx context.Context, id int32, items []model.TodoItem) error {
 	conn := r.db.GetConn()
 	defer r.db.PutConn(conn)
 
-	return util.DbTxExec(ctx, conn.Db, func(ctx context.Context, trx *sql.Tx, args ...any) error {
+	return util.DbTxExecWithHandler(ctx, conn.Db, func(ctx context.Context, trx *sql.Tx, args ...any) error {
 		// TODO: batch insert
 		for i := range items {
 			u := &items[i]

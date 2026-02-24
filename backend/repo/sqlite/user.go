@@ -41,7 +41,7 @@ func (r *Repo) UserInsert(ctx context.Context, user *model.User) error {
 	conn := r.db.GetConn()
 	defer r.db.PutConn(conn)
 
-	return util.DbTxExec(ctx, conn.Db, func(ctx context.Context, trx *sql.Tx, args ...any) error {
+	return util.DbTxExecWithHandler(ctx, conn.Db, func(ctx context.Context, trx *sql.Tx, args ...any) error {
 		now := util.Now()
 
 		res, err := trx.ExecContext(ctx, query.UserInsert, user.Name, now)
