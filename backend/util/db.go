@@ -138,7 +138,7 @@ func DbTryLastInsertId(ctx context.Context, res sql.Result) (int64, error) {
 //	0: query placeholder values
 //	1: slice of 'args' fields
 //	2: error
-func SqlExplodeStruct(args any) (string, []any, error) {
+func SqlPrepareStruct(args any) (string, []any, error) {
 	typ := reflect.ValueOf(args)
 	if typ.Kind() == reflect.Pointer {
 		typ = typ.Elem()
@@ -177,7 +177,7 @@ func SqlExplodeStruct(args any) (string, []any, error) {
 //	0: query placeholder values
 //	1: slice of 'args' fields
 //	2: error
-func SqlBatch(args any) (string, []any, error) {
+func SqlPrepareStructSlice(args any) (string, []any, error) {
 	typ := reflect.ValueOf(args)
 	if typ.Kind() == reflect.Pointer {
 		typ = typ.Elem()
@@ -193,7 +193,7 @@ func SqlBatch(args any) (string, []any, error) {
 	var slcs []any
 	for i := range count {
 		item := typ.Index(i).Interface()
-		plc, slc, err := SqlExplodeStruct(item)
+		plc, slc, err := SqlPrepareStruct(item)
 		if err != nil {
 			return "", nil, err
 		}

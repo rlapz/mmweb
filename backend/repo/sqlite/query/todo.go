@@ -5,9 +5,9 @@ const TodoInsert = `
 	values(?, ?, ?);
 `
 
-const TodoInsertItemsBatch = `
+const TodoInsertItems = `
 	insert into t_todo_item(id_todo, title, description, flags, created_at)
-	values 
+	values
 `
 
 const TodoIsExists = `

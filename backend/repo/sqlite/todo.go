@@ -23,12 +23,12 @@ func (r *Repo) TodoInsertItems(ctx context.Context, items []model.TodoItem) erro
 	conn := r.db.GetConn()
 	defer r.db.PutConn(conn)
 
-	plcs, slcs, err := util.SqlBatch(items)
+	plcs, slcs, err := util.SqlPrepareStructSlice(items)
 	if err != nil {
 		return err
 	}
 
-	qq := query.TodoInsertItemsBatch + plcs
+	qq := query.TodoInsertItems + plcs
 	res, err := conn.Db.ExecContext(ctx, qq, slcs...)
 	if err != nil {
 		return err
