@@ -2,7 +2,9 @@ package util
 
 import (
 	"context"
+	"errors"
 	"net/http"
+	"reflect"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -71,4 +73,24 @@ func Cnd2[T any](cond bool, expected T, ret *T) {
 	if cond {
 		*ret = expected
 	}
+}
+
+func StructToAnySlice(arg any) ([]any, error) {
+	typ := reflect.ValueOf(arg)
+	if typ.Kind() == reflect.Pointer {
+		typ = typ.Elem()
+	}
+
+	if typ.Kind() != reflect.Struct {
+		return nil, errors.New("not a struct")
+	}
+
+	count := typ.NumField()
+	ret := make([]any, 0, count)
+	for i := range count {
+		val := typ.Field(i).Interface()
+		ret = append(ret, val)
+	}
+
+	return ret, nil
 }
