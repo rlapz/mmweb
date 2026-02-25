@@ -23,8 +23,7 @@ func DbTxTryPartialExec(ctx context.Context, tx *sql.Tx, query string, args ...a
 			break
 		}
 
-		err = ContextSleep(ctx, config.DB_TRY_WAIT)
-		if err != nil {
+		if ContextSleep(ctx, config.DB_TRY_WAIT) != nil {
 			break
 		}
 	}
@@ -37,11 +36,7 @@ func DbTxExec(ctx context.Context, db *sql.DB, query string, args ...any) (sql.R
 	var err error
 	err = DbTxExecWithHandler(ctx, db, func(ctx context.Context, tx *sql.Tx, _ ...any) error {
 		ret, err = tx.ExecContext(ctx, query, args...)
-		if err != nil {
-			return err
-		}
-
-		return nil
+		return err
 	})
 
 	return ret, err
@@ -57,9 +52,8 @@ func DbTxTryExec(ctx context.Context, conn *sql.DB, query string, args ...any) (
 				return nil
 			}
 
-			err = ContextSleep(ctx, config.DB_TRY_WAIT)
-			if err != nil {
-				return err
+			if ContextSleep(ctx, config.DB_TRY_WAIT) != nil {
+				break
 			}
 		}
 
@@ -104,8 +98,7 @@ func DbTryRowsAffected(ctx context.Context, res sql.Result) (int64, error) {
 			break
 		}
 
-		err = ContextSleep(ctx, config.DB_TRY_WAIT)
-		if err != nil {
+		if ContextSleep(ctx, config.DB_TRY_WAIT) != nil {
 			break
 		}
 	}
@@ -123,8 +116,7 @@ func DbTryLastInsertId(ctx context.Context, res sql.Result) (int64, error) {
 			break
 		}
 
-		err = ContextSleep(ctx, config.DB_TRY_WAIT)
-		if err != nil {
+		if ContextSleep(ctx, config.DB_TRY_WAIT) != nil {
 			break
 		}
 	}
