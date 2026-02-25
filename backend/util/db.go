@@ -13,11 +13,11 @@ import (
 
 type DbTxExecHandler func(ctx context.Context, tx *sql.Tx, args ...any) error
 
-func DbTxTryPartialExec(ctx context.Context, tx *sql.Tx, query string, args ...any) (sql.Result, error) {
+func DbTryExec(ctx context.Context, conn *sql.DB, query string, args ...any) (sql.Result, error) {
 	var err error
 	var res sql.Result
 	for range config.DB_TRY_MAX {
-		res, err = tx.ExecContext(ctx, query, args...)
+		res, err = conn.ExecContext(ctx, query, args...)
 		if err == nil {
 			// OK
 			break
@@ -42,11 +42,29 @@ func DbTxExec(ctx context.Context, db *sql.DB, query string, args ...any) (sql.R
 	return ret, err
 }
 
+func DbTxTryExecPartial(ctx context.Context, tx *sql.Tx, query string, args ...any) (sql.Result, error) {
+	var err error
+	var res sql.Result
+	for range config.DB_TRY_MAX {
+		res, err = tx.ExecContext(ctx, query, args...)
+		if err == nil {
+			// OK
+			break
+		}
+
+		if ContextSleep(ctx, config.DB_TRY_WAIT) != nil {
+			break
+		}
+	}
+
+	return res, err
+}
+
 func DbTxTryExec(ctx context.Context, conn *sql.DB, query string, args ...any) (sql.Result, error) {
 	var ret sql.Result
 	var err error
 	err = DbTxExecWithHandler(ctx, conn, func(ctx context.Context, tx *sql.Tx, _ ...any) error {
-		ret, err = DbTxTryPartialExec(ctx, tx, query, args...)
+		ret, err = DbTxTryExecPartial(ctx, tx, query, args...)
 		return err
 	})
 

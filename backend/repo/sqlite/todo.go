@@ -3,7 +3,6 @@ package sqlite
 import (
 	"context"
 
-	"github.com/rlapz/mmweb/errorx"
 	"github.com/rlapz/mmweb/model"
 	"github.com/rlapz/mmweb/repo/sqlite/query"
 	"github.com/rlapz/mmweb/util"
@@ -13,7 +12,7 @@ func (r *Repo) TodoInsert(ctx context.Context, todo *model.Todo, userId int32) e
 	conn := r.db.GetConn()
 	defer r.db.PutConn(conn)
 
-	_, err := conn.Db.ExecContext(ctx, query.TodoInsert, userId, todo.Label, todo.CreatedAt)
+	_, err := util.DbTryExec(ctx, conn.Db, query.TodoInsert, userId, todo.Label, todo.CreatedAt)
 	return err
 }
 
@@ -27,20 +26,7 @@ func (r *Repo) TodoInsertItems(ctx context.Context, items []model.TodoItem) erro
 	}
 
 	plc, _ := util.DbSqlPlaceholder(items)
-	res, err := conn.Db.ExecContext(ctx, query.TodoInsert+plc, slcs...)
-	if err != nil {
-		return err
-	}
-
-	aff, err := res.RowsAffected()
-	if err != nil {
-		return err
-	}
-
-	if aff == 0 {
-		return errorx.NoDataSaved
-	}
-
+	_, err = util.DbTryExec(ctx, conn.Db, query.TodoInsert+plc, slcs...)
 	return err
 }
 

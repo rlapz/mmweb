@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 
-	"github.com/rlapz/mmweb/errorx"
 	"github.com/rlapz/mmweb/model"
 	"github.com/rlapz/mmweb/repo/sqlite/query"
 	"github.com/rlapz/mmweb/util"
@@ -42,18 +41,9 @@ func (r *Repo) UserInsert(ctx context.Context, user *model.User) error {
 
 	now := util.Now()
 	err := util.DbTxExecWithHandler(ctx, conn.Db, func(ctx context.Context, tx *sql.Tx, args ...any) error {
-		res, err := util.DbTxTryPartialExec(ctx, tx, query.UserInsert, user.Name, now)
+		res, err := util.DbTxTryExecPartial(ctx, tx, query.UserInsert, user.Name, now)
 		if err != nil {
 			return err
-		}
-
-		aff, err := util.DbTryRowsAffected(ctx, res)
-		if err != nil {
-			return err
-		}
-
-		if aff == 0 {
-			return errorx.NoDataSaved
 		}
 
 		id, err := util.DbTryLastInsertId(ctx, res)
@@ -61,20 +51,11 @@ func (r *Repo) UserInsert(ctx context.Context, user *model.User) error {
 			return err
 		}
 
-		res, err = util.DbTxTryPartialExec(ctx, tx, query.UserDetailInsert, int(id),
+		res, err = util.DbTxTryExecPartial(ctx, tx, query.UserDetailInsert, int(id),
 			user.FirstName, user.LastName, user.Email, user.Password, user.Flags,
 			now)
 		if err != nil {
 			return err
-		}
-
-		aff, err = util.DbTryRowsAffected(ctx, res)
-		if err != nil {
-			return err
-		}
-
-		if aff == 0 {
-			return errorx.NoDataSaved
 		}
 
 		return nil
