@@ -28,7 +28,8 @@ func (r *Repo) TodoInsertItems(ctx context.Context, items []model.TodoItem) erro
 		return err
 	}
 
-	qq := query.TodoInsertItems + util.DbSqlPlaceholder(len(items))
+	plc, _ := util.DbSqlPlaceholder(items)
+	qq := query.TodoInsertItems + plc
 	res, err := conn.Db.ExecContext(ctx, qq, slcs...)
 	if err != nil {
 		return err

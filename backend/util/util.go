@@ -13,6 +13,13 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+var (
+	ErrNotSlice   = errors.New("not a slice")
+	ErrNotStruct  = errors.New("no a struct")
+	ErrSliceZero  = errors.New("slice has zero item")
+	ErrStructZero = errors.New("slice has zero field")
+)
+
 func JwtMakeSignedToken(method *jwt.SigningMethodHMAC, key []byte, issuer string,
 	exp time.Duration) (string, error) {
 	now := time.Now()
@@ -75,16 +82,40 @@ func Cnd2[T any](cond bool, expected T, ret *T) {
 	}
 }
 
-func StructToAnySlice(arg any) ([]any, error) {
-	typ := reflect.ValueOf(arg)
-	if typ.Kind() == reflect.Pointer {
-		typ = typ.Elem()
-	}
+func TracePointer(item any) reflect.Value {
+	typ := reflect.ValueOf(item)
+	for {
+		if typ.Kind() == reflect.Pointer {
+			typ = typ.Elem()
+			continue
+		}
 
+		return typ
+	}
+}
+
+func TracePointerType(item any) reflect.Type {
+	typ := reflect.TypeOf(item)
+	for {
+		if typ.Kind() == reflect.Pointer {
+			typ = typ.Elem()
+			continue
+		}
+
+		return typ
+	}
+}
+
+func StructFieldsCount(item any) int {
+	typ := TracePointerType(item)
 	if typ.Kind() != reflect.Struct {
-		return nil, errors.New("not a struct")
+		return -1
 	}
 
+	return typ.NumField()
+}
+
+func structToAnySliceBuilder(typ reflect.Value) ([]any, error) {
 	count := typ.NumField()
 	ret := make([]any, 0, count)
 	for i := range count {
@@ -93,4 +124,40 @@ func StructToAnySlice(arg any) ([]any, error) {
 	}
 
 	return ret, nil
+}
+
+func StructToAnySlice(items any) ([]any, error) {
+	typ := TracePointer(items)
+	if typ.Kind() == reflect.Struct {
+		return structToAnySliceBuilder(typ)
+	}
+
+	if typ.Kind() != reflect.Slice {
+		return nil, ErrNotSlice
+	}
+
+	var fcount int
+	count := typ.Len()
+	if count == 0 {
+		return nil, ErrSliceZero
+	}
+
+	item := typ.Index(0)
+	if item.Kind() != reflect.Struct {
+		return nil, ErrNotStruct
+	}
+
+	fcount = item.NumField()
+	slcs := make([]any, 0, (fcount * count))
+	for i := range count {
+		item := typ.Index(i)
+		slice, err := structToAnySliceBuilder(TracePointer(item.Interface()))
+		if err != nil {
+			return nil, err
+		}
+
+		slcs = append(slcs, slice...)
+	}
+
+	return slcs, nil
 }

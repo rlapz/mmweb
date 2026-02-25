@@ -3,6 +3,8 @@ package util
 import (
 	"context"
 	"database/sql"
+	"fmt"
+	"reflect"
 	"strings"
 
 	"github.com/rlapz/mmweb/config"
@@ -129,11 +131,7 @@ func DbTryLastInsertId(ctx context.Context, res sql.Result) (int64, error) {
 	return ret, err
 }
 
-func DbSqlPlaceholder(count int) string {
-	if count <= 0 {
-		return ""
-	}
-
+func dbSqlPlaceholderBuilder(count int) string {
 	var stb strings.Builder
 	stb.Grow(1 + (2 * count))
 	stb.WriteString("(")
@@ -142,4 +140,48 @@ func DbSqlPlaceholder(count int) string {
 	}
 
 	return stb.String()[:stb.Len()-1] + ")"
+}
+
+func dbSqlPlaceholderSingle(typ reflect.Value) (string, error) {
+	count := typ.NumField()
+	if count == 0 {
+		return "", ErrStructZero
+	}
+
+	return dbSqlPlaceholderBuilder(count), nil
+}
+
+func DbSqlPlaceholder(items any) (string, error) {
+	typ := TracePointer(items)
+	if typ.Kind() == reflect.Struct {
+		return dbSqlPlaceholderSingle(typ)
+	}
+
+	if typ.Kind() != reflect.Slice {
+		return "", ErrNotSlice
+	}
+
+	count := typ.Len()
+	if count == 0 {
+		return "", ErrSliceZero
+	}
+
+	item := typ.Index(0)
+	if item.Kind() != reflect.Struct {
+		return "", ErrNotStruct
+	}
+
+	fcount := item.NumField()
+	if fcount == 0 {
+		return "", ErrStructZero
+	}
+
+	var stb strings.Builder
+	stb.Grow((((count * 2) + 1) * fcount) + (count - 1))
+	for range count {
+		plc := dbSqlPlaceholderBuilder(fcount)
+		fmt.Fprintf(&stb, "%s,", plc)
+	}
+
+	return stb.String()[:stb.Len()-1], nil
 }
