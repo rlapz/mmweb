@@ -3,12 +3,9 @@ package util
 import (
 	"context"
 	"database/sql"
-	"fmt"
-	"reflect"
 	"strings"
 
 	"github.com/rlapz/mmweb/config"
-	"github.com/rlapz/mmweb/errorx"
 )
 
 type DbTxExecHandler func(ctx context.Context, tx *sql.Tx, args ...any) error
@@ -132,78 +129,17 @@ func DbTryLastInsertId(ctx context.Context, res sql.Result) (int64, error) {
 	return ret, err
 }
 
-// 'args' must be a struct
-// ret:
-//
-//	0: query placeholder values
-//	1: slice of 'args' fields
-//	2: error
-func SqlPrepareStruct(args any) (string, []any, error) {
-	typ := reflect.ValueOf(args)
-	if typ.Kind() == reflect.Pointer {
-		typ = typ.Elem()
-	}
-
-	if typ.Kind() != reflect.Struct {
-		return "", nil, errorx.DataInvalid
-	}
-
-	count := typ.NumField()
-	if count == 0 {
-		return "", nil, errorx.DataInvalid
+func DbSqlPlaceholder(count int) string {
+	if count <= 0 {
+		return ""
 	}
 
 	var stb strings.Builder
 	stb.Grow(1 + (2 * count))
 	stb.WriteString("(")
-
-	nargs := make([]any, 0, count)
-	for i := range count {
-		val := typ.Field(i).Interface()
-		nargs = append(nargs, val)
-
+	for range count {
 		stb.WriteString("?,")
 	}
 
-	plc := stb.String()
-	plc = plc[:stb.Len()-1] + ")"
-
-	return plc, nargs, nil
-}
-
-// 'args' must be a slice of structs
-// ret:
-//
-//	0: query placeholder values
-//	1: slice of 'args' fields
-//	2: error
-func SqlPrepareStructSlice(args any) (string, []any, error) {
-	typ := reflect.ValueOf(args)
-	if typ.Kind() == reflect.Pointer {
-		typ = typ.Elem()
-	}
-
-	if typ.Kind() != reflect.Slice {
-		return "", nil, errorx.DataInvalid
-	}
-
-	count := typ.Len()
-
-	var stb strings.Builder
-	var slcs []any
-	for i := range count {
-		item := typ.Index(i).Interface()
-		plc, slc, err := SqlPrepareStruct(item)
-		if err != nil {
-			return "", nil, err
-		}
-
-		slcs = append(slcs, slc...)
-		fmt.Fprintf(&stb, "%s,", plc)
-	}
-
-	plcs := stb.String()
-	plcs = plcs[:stb.Len()-1]
-
-	return plcs, slcs, nil
+	return stb.String()[:stb.Len()-1] + ")"
 }
