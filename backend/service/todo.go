@@ -3,14 +3,14 @@ package service
 import (
 	"context"
 
-	"github.com/rlapz/mmweb/errorx"
 	"github.com/rlapz/mmweb/model"
+	"github.com/rlapz/mmweb/util"
 )
 
 func (s *Service) AddTodo(ctx context.Context, todo *model.Todo, uname string) error {
-	// TODO: validate fields
-	if todo.Label == "" {
-		return errorx.DataInvalid
+	err := util.ValidateStruct(ctx, todo)
+	if err != nil {
+		return err
 	}
 
 	id, err := s.repo.UserSelectIdByName(ctx, uname)
@@ -22,7 +22,13 @@ func (s *Service) AddTodo(ctx context.Context, todo *model.Todo, uname string) e
 }
 
 func (s *Service) AddTodoItems(ctx context.Context, id int32, items []model.TodoItem) error {
-	// TODO: validate fields
+	for i := range items {
+		item := &items[i]
+		err := util.ValidateStruct(ctx, item)
+		if err != nil {
+			return err
+		}
+	}
 
 	for i := range items {
 		v := &items[i]

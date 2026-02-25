@@ -79,7 +79,7 @@ func (c *controller) getTodoList(w http.ResponseWriter, r *http.Request) {
 
 func (c *controller) postTodoItem(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	todo, err := util.HttpJsonParseBody[model.Todo](ctx, r.Body)
+	todo, err := util.HttpJsonParseBody[model.Todo](r.Body)
 	if err != nil {
 		util.HttpErrBadRequest(w, "")
 		return
@@ -96,7 +96,7 @@ func (c *controller) postTodoItem(w http.ResponseWriter, r *http.Request) {
 	switch {
 	case err == nil: // ok
 	case errors.Is(err, errorx.DataInvalid):
-		util.HttpErrBadRequest(w, err.Error()+": make sure mandatory fields are not empty!")
+		util.HttpErrBadRequest(w, err.Error())
 		return
 	default:
 		util.HttpErrInternal(w, err, "failed to add new item")

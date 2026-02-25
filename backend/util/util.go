@@ -7,9 +7,11 @@ import (
 	"reflect"
 	"time"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	"github.com/rlapz/mmweb/config"
+	"github.com/rlapz/mmweb/errorx"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -160,4 +162,14 @@ func StructToAnySlice(items any) ([]any, error) {
 	}
 
 	return slcs, nil
+}
+
+func ValidateStruct(ctx context.Context, item any) error {
+	vl := validator.New()
+	err := vl.StructCtx(ctx, item)
+	if err != nil {
+		return errors.Join(err, errorx.DataInvalid)
+	}
+
+	return nil
 }

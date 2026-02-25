@@ -1,7 +1,6 @@
 package util
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -9,7 +8,6 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/go-playground/validator/v10"
 	"github.com/rlapz/mmweb/model/api"
 )
 
@@ -89,12 +87,11 @@ func HttpMethodCheck(w http.ResponseWriter, r *http.Request, expected string) bo
 	return true
 }
 
-func HttpJsonParseBody[T any](ctx context.Context, reader io.Reader) (*T, error) {
+func HttpJsonParseBody[T any](reader io.Reader) (*T, error) {
 	ret := new(T)
 	if err := json.NewDecoder(reader).Decode(ret); err != nil {
 		return nil, err
 	}
 
-	vl := validator.New()
-	return ret, vl.StructCtx(ctx, ret)
+	return ret, nil
 }

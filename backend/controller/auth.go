@@ -56,7 +56,7 @@ func (c *controller) registerHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	ctx := r.Context()
-	user, err := util.HttpJsonParseBody[model.User](ctx, r.Body)
+	user, err := util.HttpJsonParseBody[model.User](r.Body)
 	if err != nil {
 		util.HttpErrBadRequest(w, err.Error())
 		return
@@ -66,7 +66,7 @@ func (c *controller) registerHandler(w http.ResponseWriter, r *http.Request) {
 	switch {
 	case err == nil:
 	case errors.Is(err, errorx.DataInvalid):
-		util.HttpErrBadRequest(w, "make sure mandatory fields are not empty!")
+		util.HttpErrBadRequest(w, err.Error())
 		return
 	case errors.Is(err, errorx.DataExists):
 		util.HttpErrBadRequest(w, "such user already exists!")
