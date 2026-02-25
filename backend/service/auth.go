@@ -66,14 +66,12 @@ func (s *Service) AuthLogout(ctx context.Context, token string) error {
 }
 
 func (s *Service) AuthRegister(ctx context.Context, user *model.User) error {
-	// TODO: validate fields
-
-	exists, err := s.repo.UserIsExists(ctx, user.Name)
+	isExists, err := s.repo.UserIsExists(ctx, user.Name)
 	if err != nil {
 		return err
 	}
 
-	if exists {
+	if isExists {
 		return errorx.DataExists
 	}
 

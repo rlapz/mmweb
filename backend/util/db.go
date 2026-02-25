@@ -3,6 +3,7 @@ package util
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"reflect"
 	"strings"
@@ -184,4 +185,18 @@ func DbSqlPlaceholder(items any) (string, error) {
 	}
 
 	return stb.String()[:stb.Len()-1], nil
+}
+
+func DbDataIsExists(row *sql.Row) (bool, error) {
+	var isExists bool
+	err := row.Scan(&isExists)
+	if errors.Is(err, sql.ErrNoRows) {
+		return false, nil
+	}
+
+	if err != nil {
+		return false, err
+	}
+
+	return isExists, nil
 }

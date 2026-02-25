@@ -3,7 +3,6 @@ package sqlite
 import (
 	"context"
 	"database/sql"
-	"errors"
 
 	"github.com/rlapz/mmweb/errorx"
 	"github.com/rlapz/mmweb/model"
@@ -88,16 +87,6 @@ func (r *Repo) UserIsExists(ctx context.Context, uname string) (bool, error) {
 	conn := r.db.GetConn()
 	defer r.db.PutConn(conn)
 
-	var ok bool
 	row := conn.Db.QueryRowContext(ctx, query.UserIsExists, uname)
-	err := row.Scan(&ok)
-	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return false, nil
-		}
-
-		return false, err
-	}
-
-	return true, err
+	return util.DbDataIsExists(row)
 }

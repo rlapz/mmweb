@@ -78,13 +78,13 @@ func (c *controller) getTodoList(w http.ResponseWriter, r *http.Request) {
 }
 
 func (c *controller) postTodoItem(w http.ResponseWriter, r *http.Request) {
-	todo, err := util.HttpJsonParseBody[model.Todo](r.Body)
+	ctx := r.Context()
+	todo, err := util.HttpJsonParseBody[model.Todo](ctx, r.Body)
 	if err != nil {
 		util.HttpErrBadRequest(w, "")
 		return
 	}
 
-	ctx := r.Context()
 	claims := util.ContextGetJwtClaims(ctx)
 	uname, err := claims.GetIssuer()
 	if err != nil {

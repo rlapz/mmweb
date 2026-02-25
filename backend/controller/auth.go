@@ -15,7 +15,7 @@ func (c *controller) loginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	uname, pswd, ok := r.BasicAuth()
-	if !ok {
+	if !ok || (uname == "") || (pswd == "") {
 		util.HttpErrBadRequest(w, "invalid username or password")
 		return
 	}
@@ -55,13 +55,14 @@ func (c *controller) registerHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := util.HttpJsonParseBody[model.User](r.Body)
+	ctx := r.Context()
+	user, err := util.HttpJsonParseBody[model.User](ctx, r.Body)
 	if err != nil {
-		util.HttpErrBadRequest(w, "failed to parse request body")
+		util.HttpErrBadRequest(w, err.Error())
 		return
 	}
 
-	err = c.service.AuthRegister(r.Context(), user)
+	err = c.service.AuthRegister(ctx, user)
 	switch {
 	case err == nil:
 	case errors.Is(err, errorx.DataInvalid):

@@ -2,8 +2,6 @@ package sqlite
 
 import (
 	"context"
-	"database/sql"
-	"errors"
 
 	"github.com/rlapz/mmweb/errorx"
 	"github.com/rlapz/mmweb/model"
@@ -29,8 +27,7 @@ func (r *Repo) TodoInsertItems(ctx context.Context, items []model.TodoItem) erro
 	}
 
 	plc, _ := util.DbSqlPlaceholder(items)
-	qq := query.TodoInsertItems + plc
-	res, err := conn.Db.ExecContext(ctx, qq, slcs...)
+	res, err := conn.Db.ExecContext(ctx, query.TodoInsert+plc, slcs...)
 	if err != nil {
 		return err
 	}
@@ -51,18 +48,8 @@ func (r *Repo) TodoIsExists(ctx context.Context, label string, userId int32) (bo
 	conn := r.db.GetConn()
 	defer r.db.PutConn(conn)
 
-	var ok bool
 	row := conn.Db.QueryRowContext(ctx, query.TodoIsExists, label, userId)
-	err := row.Scan(&ok)
-	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return false, nil
-		}
-
-		return false, err
-	}
-
-	return true, err
+	return util.DbDataIsExists(row)
 }
 
 func (r *Repo) TodoSelectById(ctx context.Context, id int32) (*model.Todo, error) {
