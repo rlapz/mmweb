@@ -46,17 +46,7 @@ func DbTxTryExec(ctx context.Context, conn *sql.DB, query string, args ...any) (
 	var ret sql.Result
 	var err error
 	err = DbTxExecWithHandler(ctx, conn, func(ctx context.Context, tx *sql.Tx, _ ...any) error {
-		for range config.DB_TRY_MAX {
-			ret, err = tx.ExecContext(ctx, query, args...)
-			if err == nil {
-				return nil
-			}
-
-			if ContextSleep(ctx, config.DB_TRY_WAIT) != nil {
-				break
-			}
-		}
-
+		ret, err = DbTxTryPartialExec(ctx, tx, query, args...)
 		return err
 	})
 
