@@ -132,26 +132,6 @@ func DbTryLastInsertId(ctx context.Context, res sql.Result) (int64, error) {
 	return ret, err
 }
 
-func dbSqlPlaceholderBuilder(count int) string {
-	var stb strings.Builder
-	stb.Grow(1 + (2 * count))
-	stb.WriteString("(")
-	for range count {
-		stb.WriteString("?,")
-	}
-
-	return stb.String()[:stb.Len()-1] + ")"
-}
-
-func dbSqlPlaceholderSingle(typ reflect.Value) (string, error) {
-	count := typ.NumField()
-	if count == 0 {
-		return "", ErrStructZero
-	}
-
-	return dbSqlPlaceholderBuilder(count), nil
-}
-
 func DbSqlPlaceholder(items any) (string, error) {
 	typ := UnwrapPointer(items)
 	if typ.Kind() == reflect.Struct {
@@ -199,4 +179,25 @@ func DbDataIsExists(row *sql.Row) (bool, error) {
 	}
 
 	return isExists, nil
+}
+
+// Private
+func dbSqlPlaceholderBuilder(count int) string {
+	var stb strings.Builder
+	stb.Grow(1 + (2 * count))
+	stb.WriteString("(")
+	for range count {
+		stb.WriteString("?,")
+	}
+
+	return stb.String()[:stb.Len()-1] + ")"
+}
+
+func dbSqlPlaceholderSingle(typ reflect.Value) (string, error) {
+	count := typ.NumField()
+	if count == 0 {
+		return "", ErrStructZero
+	}
+
+	return dbSqlPlaceholderBuilder(count), nil
 }

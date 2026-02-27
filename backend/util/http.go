@@ -11,37 +11,6 @@ import (
 	"github.com/rlapz/mmweb/model/api"
 )
 
-func httpResp(w http.ResponseWriter, code int, resp *api.ApiResp) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(code)
-
-	err := json.NewEncoder(w).Encode(&resp)
-	if err != nil {
-		log.Println("error: baseResp:", err.Error())
-	}
-}
-
-func httpRespErr(w http.ResponseWriter, err error, errCode int, def string, msg string) {
-	var stb strings.Builder
-	stb.Grow(len(def) + len(msg) + 2)
-
-	stb.WriteString(def)
-	if msg != "" {
-		fmt.Fprint(&stb, ": ", msg)
-	}
-
-	resp := api.ApiResp{
-		Message: stb.String(),
-	}
-
-	httpResp(w, errCode, &resp)
-	if err != nil {
-		log.Printf("error: %s: %s\n", err.Error(), resp.Message)
-	} else {
-		log.Println("error:", resp.Message)
-	}
-}
-
 func HttpErrInternal(w http.ResponseWriter, err error, msg string) {
 	httpRespErr(w, err, http.StatusInternalServerError, "internal", msg)
 }
@@ -94,4 +63,36 @@ func HttpJsonParseBody[T any](reader io.Reader) (*T, error) {
 	}
 
 	return ret, nil
+}
+
+// Private
+func httpResp(w http.ResponseWriter, code int, resp *api.ApiResp) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(code)
+
+	err := json.NewEncoder(w).Encode(&resp)
+	if err != nil {
+		log.Println("error: baseResp:", err.Error())
+	}
+}
+
+func httpRespErr(w http.ResponseWriter, err error, errCode int, def string, msg string) {
+	var stb strings.Builder
+	stb.Grow(len(def) + len(msg) + 2)
+
+	stb.WriteString(def)
+	if msg != "" {
+		fmt.Fprint(&stb, ": ", msg)
+	}
+
+	resp := api.ApiResp{
+		Message: stb.String(),
+	}
+
+	httpResp(w, errCode, &resp)
+	if err != nil {
+		log.Printf("error: %s: %s\n", err.Error(), resp.Message)
+	} else {
+		log.Println("error:", resp.Message)
+	}
 }

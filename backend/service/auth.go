@@ -14,13 +14,13 @@ import (
 func (s *Service) AuthVerify(ctx context.Context, token string) (jwt.MapClaims, error) {
 	claims, err := s.authParseToken(token)
 	if err != nil {
-		return nil, err
+		return nil, errors.Join(errorx.AuthTokenInvalid, err)
 	}
 
 	flags, err := s.repo.AuthTokenSelectFlags(ctx, token)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, nil
+			return nil, errorx.AuthTokenInvalid
 		}
 
 		return nil, err

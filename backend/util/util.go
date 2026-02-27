@@ -106,16 +106,6 @@ func StructFieldsCount(item any) int {
 	return UnwrapPointerType(item).NumField()
 }
 
-func structToAnySliceBuilder(typ reflect.Value) ([]any, error) {
-	count := typ.NumField()
-	ret := make([]any, count)
-	for i := range count {
-		ret[i] = typ.Field(i).Interface()
-	}
-
-	return ret, nil
-}
-
 // TODO: convert all data types and support variadic parameter
 func StructToAnySlice(items any) ([]any, error) {
 	typ := UnwrapPointer(items)
@@ -160,4 +150,15 @@ func ValidateStruct(ctx context.Context, item any) error {
 	}
 
 	return nil
+}
+
+// Private
+func structToAnySliceBuilder(typ reflect.Value) ([]any, error) {
+	count := typ.NumField()
+	ret := make([]any, count)
+	for i := range count {
+		ret[i] = typ.Field(i).Interface()
+	}
+
+	return ret, nil
 }

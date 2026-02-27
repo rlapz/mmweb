@@ -38,7 +38,7 @@ func (m *Middleware) AuthHandler(next http.Handler) http.Handler {
 		claims, err := m.service.AuthVerify(r.Context(), token[bearLen:])
 		switch {
 		case err == nil: // OK
-		case errors.Is(err, errorx.AuthSignMethod), errors.Is(err, errorx.AuthTokenClaims):
+		case errors.Is(err, errorx.AuthTokenInvalid):
 			util.HttpErrUnauthorized(w, err.Error())
 			return
 		default:
