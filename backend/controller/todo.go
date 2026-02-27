@@ -40,7 +40,7 @@ func (c *controller) getTodo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data, err := c.service.GetTodo(r.Context(), int32(idInt))
+	data, err := c.service.TodoGet(r.Context(), int32(idInt))
 	if err != nil {
 		util.HttpErrInternal(w, err, "failed to get todo")
 		return
@@ -63,7 +63,7 @@ func (c *controller) getTodoList(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	list, err := c.service.GetTodoList(ctx, uname)
+	list, err := c.service.TodoGetList(ctx, uname)
 	if err != nil {
 		util.HttpErrInternal(w, err, "failed to get todo list")
 		return
@@ -92,7 +92,7 @@ func (c *controller) postTodoItem(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = c.service.AddTodo(ctx, todo, uname)
+	err = c.service.TodoAdd(ctx, todo, uname)
 	switch {
 	case err == nil: // ok
 	case errors.Is(err, errorx.DataInvalid):

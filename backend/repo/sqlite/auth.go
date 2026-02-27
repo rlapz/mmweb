@@ -3,29 +3,40 @@ package sqlite
 import (
 	"context"
 
+	"github.com/rlapz/mmweb/db"
 	"github.com/rlapz/mmweb/repo/sqlite/query"
 	"github.com/rlapz/mmweb/util"
 )
 
-func (r *Repo) AuthTokenInsert(ctx context.Context, token string, flags int) error {
-	conn := r.db.GetConn()
-	defer r.db.PutConn(conn)
+type Auth struct {
+	db *db.SqlitePool
+}
+
+func AuthNew(db *db.SqlitePool) *Auth {
+	return &Auth{
+		db: db,
+	}
+}
+
+func (a *Auth) TokenInsert(ctx context.Context, token string, flags int) error {
+	conn := a.db.GetConn()
+	defer a.db.PutConn(conn)
 
 	_, err := util.DbTryExec(ctx, conn.Db, query.AuthTokenInsert, token, flags)
 	return err
 }
 
-func (r *Repo) AuthTokenUpdateFlags(ctx context.Context, token string, flags int) error {
-	conn := r.db.GetConn()
-	defer r.db.PutConn(conn)
+func (a *Auth) TokenUpdateFlags(ctx context.Context, token string, flags int) error {
+	conn := a.db.GetConn()
+	defer a.db.PutConn(conn)
 
 	_, err := util.DbTryExec(ctx, conn.Db, query.AuthTokenUpdateFlags, flags, token)
 	return err
 }
 
-func (r *Repo) AuthTokenSelectFlags(ctx context.Context, token string) (int, error) {
-	conn := r.db.GetConn()
-	defer r.db.PutConn(conn)
+func (a *Auth) TokenSelectFlags(ctx context.Context, token string) (int, error) {
+	conn := a.db.GetConn()
+	defer a.db.PutConn(conn)
 
 	var ret int
 	row := conn.Db.QueryRowContext(ctx, query.AuthTokenSelectFlags, token)

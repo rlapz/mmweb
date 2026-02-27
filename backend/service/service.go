@@ -12,14 +12,19 @@ type Service struct {
 	signMethod *jwt.SigningMethodHMAC
 	signKey    []byte
 	loginExp   time.Duration
-	repo       repo.Repo
+
+	repoAuth repo.Auth
+	repoTodo repo.Todo
+	repoUser repo.User
 }
 
-func New(cfg *config.Config, r repo.Repo) *Service {
+func New(cfg *config.Config, authRepo repo.Auth, todoRepo repo.Todo, userRepo repo.User) *Service {
 	return &Service{
 		signMethod: cfg.JwtSignMethod,
 		signKey:    cfg.JwtSignatureKey,
 		loginExp:   cfg.LoginExp,
-		repo:       r,
+		repoAuth:   authRepo,
+		repoTodo:   todoRepo,
+		repoUser:   userRepo,
 	}
 }

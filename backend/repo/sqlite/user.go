@@ -4,14 +4,25 @@ import (
 	"context"
 	"database/sql"
 
+	"github.com/rlapz/mmweb/db"
 	"github.com/rlapz/mmweb/model"
 	"github.com/rlapz/mmweb/repo/sqlite/query"
 	"github.com/rlapz/mmweb/util"
 )
 
-func (r *Repo) UserSelectIdByName(ctx context.Context, uname string) (int32, error) {
-	conn := r.db.GetConn()
-	defer r.db.PutConn(conn)
+type User struct {
+	db *db.SqlitePool
+}
+
+func UserNew(db *db.SqlitePool) *User {
+	return &User{
+		db: db,
+	}
+}
+
+func (u *User) SelectIdByName(ctx context.Context, uname string) (int32, error) {
+	conn := u.db.GetConn()
+	defer u.db.PutConn(conn)
 
 	var id int32
 	row := conn.Db.QueryRowContext(ctx, query.UserSelectIdByName, uname)
@@ -22,9 +33,9 @@ func (r *Repo) UserSelectIdByName(ctx context.Context, uname string) (int32, err
 	return id, nil
 }
 
-func (r *Repo) UserSelectPasswordByName(ctx context.Context, uname string) (string, error) {
-	conn := r.db.GetConn()
-	defer r.db.PutConn(conn)
+func (u *User) SelectPasswordByName(ctx context.Context, uname string) (string, error) {
+	conn := u.db.GetConn()
+	defer u.db.PutConn(conn)
 
 	var passwd string
 	row := conn.Db.QueryRowContext(ctx, query.UserSelectPasswordByName, uname)
@@ -35,9 +46,9 @@ func (r *Repo) UserSelectPasswordByName(ctx context.Context, uname string) (stri
 	return passwd, nil
 }
 
-func (r *Repo) UserInsert(ctx context.Context, user *model.User) error {
-	conn := r.db.GetConn()
-	defer r.db.PutConn(conn)
+func (u *User) Insert(ctx context.Context, user *model.User) error {
+	conn := u.db.GetConn()
+	defer u.db.PutConn(conn)
 
 	now := util.Now()
 	err := util.DbTxExecWithHandler(ctx, conn.Db, func(ctx context.Context, tx *sql.Tx, args ...any) error {
@@ -64,9 +75,9 @@ func (r *Repo) UserInsert(ctx context.Context, user *model.User) error {
 	return err
 }
 
-func (r *Repo) UserIsExists(ctx context.Context, uname string) (bool, error) {
-	conn := r.db.GetConn()
-	defer r.db.PutConn(conn)
+func (u *User) IsExists(ctx context.Context, uname string) (bool, error) {
+	conn := u.db.GetConn()
+	defer u.db.PutConn(conn)
 
 	row := conn.Db.QueryRowContext(ctx, query.UserIsExists, uname)
 	return util.DbDataIsExists(row)

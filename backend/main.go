@@ -62,13 +62,15 @@ func run(cfg *config.Config) error {
 	}
 	defer dbb.Destory()
 
-	repp := repoSqlite.New(dbb)
-	srvv := service.New(cfg, repp)
+	repoAuth := repoSqlite.AuthNew(dbb)
+	repoTodo := repoSqlite.TodoNew(dbb)
+	repoUser := repoSqlite.UserNew(dbb)
 
-	mid := middleware.New(srvv)
-	controller.Init(mid, srvv)
+	serv := service.New(cfg, repoAuth, repoTodo, repoUser)
+	midd := middleware.New(serv)
+	controller.Init(midd, serv)
 
-	err = serve(mid, cfg)
+	err = serve(midd, cfg)
 	if err != nil {
 		log.Println("error: Run: serve:", err)
 	}

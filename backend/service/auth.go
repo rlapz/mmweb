@@ -17,7 +17,7 @@ func (s *Service) AuthVerify(ctx context.Context, token string) (jwt.MapClaims, 
 		return nil, errors.Join(errorx.AuthTokenInvalid, err)
 	}
 
-	flags, err := s.repo.AuthTokenSelectFlags(ctx, token)
+	flags, err := s.repoAuth.TokenSelectFlags(ctx, token)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, errorx.AuthTokenInvalid
@@ -34,7 +34,7 @@ func (s *Service) AuthVerify(ctx context.Context, token string) (jwt.MapClaims, 
 }
 
 func (s *Service) AuthLogin(ctx context.Context, uname, passwd string) (string, error) {
-	hashed, err := s.repo.UserSelectPasswordByName(ctx, uname)
+	hashed, err := s.repoUser.SelectPasswordByName(ctx, uname)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return "", errorx.AuthInvalidCredential
@@ -52,7 +52,7 @@ func (s *Service) AuthLogin(ctx context.Context, uname, passwd string) (string, 
 		return "", err
 	}
 
-	err = s.repo.AuthTokenInsert(ctx, token, model.AUTH_FLAG_LOGGED_IN)
+	err = s.repoAuth.TokenInsert(ctx, token, model.AUTH_FLAG_LOGGED_IN)
 	if err != nil {
 		return "", err
 	}
@@ -61,7 +61,7 @@ func (s *Service) AuthLogin(ctx context.Context, uname, passwd string) (string, 
 }
 
 func (s *Service) AuthLogout(ctx context.Context, token string) error {
-	return s.repo.AuthTokenUpdateFlags(ctx, token, model.AUTH_FLAG_LOGGED_OUT)
+	return s.repoAuth.TokenUpdateFlags(ctx, token, model.AUTH_FLAG_LOGGED_OUT)
 }
 
 func (s *Service) AuthRegister(ctx context.Context, user *model.User) error {
@@ -70,7 +70,7 @@ func (s *Service) AuthRegister(ctx context.Context, user *model.User) error {
 		return err
 	}
 
-	isExists, err := s.repo.UserIsExists(ctx, user.Name)
+	isExists, err := s.repoUser.IsExists(ctx, user.Name)
 	if err != nil {
 		return err
 	}
@@ -84,7 +84,7 @@ func (s *Service) AuthRegister(ctx context.Context, user *model.User) error {
 		return err
 	}
 
-	return s.repo.UserInsert(ctx, user)
+	return s.repoUser.Insert(ctx, user)
 }
 
 // Private
