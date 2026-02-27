@@ -84,61 +84,51 @@ func Cnd2[T any](cond bool, expected T, ret *T) {
 	}
 }
 
-func TracePointer(item any) reflect.Value {
+func UnwrapPointer(item any) reflect.Value {
 	typ := reflect.ValueOf(item)
-	for {
-		if typ.Kind() == reflect.Pointer {
-			typ = typ.Elem()
-			continue
-		}
-
-		return typ
+	for typ.Kind() == reflect.Pointer {
+		typ = reflect.Indirect(typ)
 	}
+
+	return typ
 }
 
-func TracePointerType(item any) reflect.Type {
+func UnwrapPointerType(item any) reflect.Type {
 	typ := reflect.TypeOf(item)
-	for {
-		if typ.Kind() == reflect.Pointer {
-			typ = typ.Elem()
-			continue
-		}
-
-		return typ
+	for typ.Kind() == reflect.Pointer {
+		typ = typ.Elem()
 	}
+
+	return typ
 }
 
 func StructFieldsCount(item any) int {
-	typ := TracePointerType(item)
-	if typ.Kind() != reflect.Struct {
-		return -1
-	}
-
-	return typ.NumField()
+	return UnwrapPointerType(item).NumField()
 }
 
 func structToAnySliceBuilder(typ reflect.Value) ([]any, error) {
 	count := typ.NumField()
-	ret := make([]any, 0, count)
+	ret := make([]any, count)
 	for i := range count {
-		val := typ.Field(i).Interface()
-		ret = append(ret, val)
+		ret[i] = typ.Field(i).Interface()
 	}
 
 	return ret, nil
 }
 
+// TODO: convert all data types and support variadic parameter
 func StructToAnySlice(items any) ([]any, error) {
-	typ := TracePointer(items)
+	typ := UnwrapPointer(items)
 	if typ.Kind() == reflect.Struct {
 		return structToAnySliceBuilder(typ)
 	}
 
-	if typ.Kind() != reflect.Slice {
+	switch typ.Kind() {
+	case reflect.Array, reflect.Slice:
+	default:
 		return nil, ErrNotSlice
 	}
 
-	var fcount int
 	count := typ.Len()
 	if count == 0 {
 		return nil, ErrSliceZero
@@ -149,11 +139,9 @@ func StructToAnySlice(items any) ([]any, error) {
 		return nil, ErrNotStruct
 	}
 
-	fcount = item.NumField()
-	slcs := make([]any, 0, (fcount * count))
+	slcs := make([]any, 0, (item.NumField() * count))
 	for i := range count {
-		item := typ.Index(i)
-		slice, err := structToAnySliceBuilder(TracePointer(item.Interface()))
+		slice, err := structToAnySliceBuilder(UnwrapPointer(typ.Index(i).Interface()))
 		if err != nil {
 			return nil, err
 		}

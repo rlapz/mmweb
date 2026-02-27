@@ -153,7 +153,7 @@ func dbSqlPlaceholderSingle(typ reflect.Value) (string, error) {
 }
 
 func DbSqlPlaceholder(items any) (string, error) {
-	typ := TracePointer(items)
+	typ := UnwrapPointer(items)
 	if typ.Kind() == reflect.Struct {
 		return dbSqlPlaceholderSingle(typ)
 	}
