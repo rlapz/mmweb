@@ -4,6 +4,8 @@ import "errors"
 
 var (
 	AuthTokenNotFound     = errors.New("auth: no token found")
+	AuthTokenInvalid      = errors.New("auth: invalid token")
+	AuthMethodInvalid     = errors.New("auth: invalid token method")
 	AuthSignMethod        = errors.New("auth: invalid signing method")
 	AuthTokenClaims       = errors.New("auth: failed to claim token")
 	AuthInvalidCredential = errors.New("auth: invalid credential")

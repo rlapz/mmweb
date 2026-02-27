@@ -1,8 +1,8 @@
 package middleware
 
 import (
+	"errors"
 	"net/http"
-	"strings"
 
 	"github.com/rlapz/mmweb/errorx"
 	"github.com/rlapz/mmweb/util"
@@ -17,28 +17,32 @@ func (m *Middleware) AuthHandler(next http.Handler) http.Handler {
 			return
 		}
 
-		auth := r.Header.Get("Authorization")
-		if !strings.Contains(auth, bear) {
+		token := r.Header.Get("Authorization")
+		tokenlen := len(token)
+		if tokenlen <= 0 {
 			util.HttpErrBadRequest(w, errorx.AuthTokenNotFound.Error())
 			return
 		}
 
-		token := strings.ReplaceAll(auth, bear, "")
-
-		isOk, err := m.service.AuthVerify(r.Context(), token)
-		if err != nil {
-			util.HttpErrInternal(w, err, "failed to check token")
+		bearLen := len(bear)
+		if tokenlen <= bearLen {
+			util.HttpErrBadRequest(w, errorx.AuthTokenInvalid.Error())
 			return
 		}
 
-		if !isOk {
-			util.HttpErrUnauthorized(w, "invalid token")
+		if token[:bearLen] != bear {
+			util.HttpErrBadRequest(w, errorx.AuthMethodInvalid.Error())
 			return
 		}
 
-		claims, err := m.service.AuthToken(token)
-		if err != nil {
+		claims, err := m.service.AuthVerify(r.Context(), token[bearLen:])
+		switch {
+		case err == nil: // OK
+		case errors.Is(err, errorx.AuthSignMethod), errors.Is(err, errorx.AuthTokenClaims):
 			util.HttpErrUnauthorized(w, err.Error())
+			return
+		default:
+			util.HttpErrInternal(w, err, "failed to check token")
 			return
 		}
 

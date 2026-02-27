@@ -11,26 +11,25 @@ import (
 	"github.com/rlapz/mmweb/util"
 )
 
-func (s *Service) AuthToken(token string) (jwt.MapClaims, error) {
-	tokSigned, err := jwt.Parse(token, func(tok *jwt.Token) (any, error) {
-		mth, ok := tok.Method.(*jwt.SigningMethodHMAC)
-		if !ok || mth != s.signMethod {
-			return nil, errorx.AuthSignMethod
-		}
-
-		return s.signKey, nil
-	})
-
+func (s *Service) AuthVerify(ctx context.Context, token string) (jwt.MapClaims, error) {
+	claims, err := s.authParseToken(token)
 	if err != nil {
 		return nil, err
 	}
 
-	claims, ok := tokSigned.Claims.(jwt.MapClaims)
-	if !ok || !tokSigned.Valid {
-		return nil, errorx.AuthTokenClaims
+	flags, err := s.repo.AuthTokenSelectFlags(ctx, token)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, nil
+		}
+
+		return nil, err
 	}
 
-	claims["token"] = token
+	if flags != model.AUTH_FLAG_LOGGED_IN {
+		return nil, errorx.AuthTokenInvalid
+	}
+
 	return claims, nil
 }
 
@@ -88,19 +87,26 @@ func (s *Service) AuthRegister(ctx context.Context, user *model.User) error {
 	return s.repo.UserInsert(ctx, user)
 }
 
-func (s *Service) AuthVerify(ctx context.Context, token string) (bool, error) {
-	flags, err := s.repo.AuthTokenSelectFlags(ctx, token)
-	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return false, nil
+// Private
+func (s *Service) authParseToken(token string) (jwt.MapClaims, error) {
+	tokSigned, err := jwt.Parse(token, func(tok *jwt.Token) (any, error) {
+		mth, ok := tok.Method.(*jwt.SigningMethodHMAC)
+		if !ok || mth != s.signMethod {
+			return nil, errorx.AuthSignMethod
 		}
 
-		return false, err
+		return s.signKey, nil
+	})
+
+	if err != nil {
+		return nil, err
 	}
 
-	if flags != model.AUTH_FLAG_LOGGED_IN {
-		return false, nil
+	claims, ok := tokSigned.Claims.(jwt.MapClaims)
+	if !ok || !tokSigned.Valid {
+		return nil, errorx.AuthTokenClaims
 	}
 
-	return true, nil
+	claims["token"] = token
+	return claims, nil
 }
