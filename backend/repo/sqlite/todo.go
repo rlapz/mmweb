@@ -126,7 +126,7 @@ func (t *Todo) InsertItem(ctx context.Context, item *model.TodoItem) error {
 	slcs[3] = item.Flags
 	slcs[4] = util.Now()
 
-	plc := util.DbSqlPlaceholderBuilder(len(slcs))
+	plc := util.DbSqlPlaceholder(len(slcs), 1)
 	_, err := util.DbTryExec(ctx, conn.Db, query.TodoInsertItems+plc, slcs...)
 	return err
 }
@@ -144,7 +144,7 @@ func (t *Todo) InsertItems(ctx context.Context, items []model.TodoItem) error {
 		slcs = append(slcs, x.IdTodo, x.Title, x.Description, x.Flags, now)
 	}
 
-	plc := util.DbSqlPlaceholderBuilder(len(slcs))
+	plc := util.DbSqlPlaceholder(5, len(items))
 	_, err := util.DbTryExec(ctx, conn.Db, query.TodoInsertItems+plc, slcs...)
 	return err
 }

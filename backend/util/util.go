@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"net/http"
-	"reflect"
 	"time"
 
 	"github.com/go-playground/validator/v10"
@@ -84,64 +83,6 @@ func Cnd2[T any](cond bool, expected T, ret *T) {
 	}
 }
 
-func UnwrapPointer(item any) reflect.Value {
-	typ := reflect.ValueOf(item)
-	for typ.Kind() == reflect.Pointer {
-		typ = reflect.Indirect(typ)
-	}
-
-	return typ
-}
-
-func UnwrapPointerType(item any) reflect.Type {
-	typ := reflect.TypeOf(item)
-	for typ.Kind() == reflect.Pointer {
-		typ = typ.Elem()
-	}
-
-	return typ
-}
-
-func StructFieldsCount(item any) int {
-	return UnwrapPointerType(item).NumField()
-}
-
-// TODO: convert all data types and support variadic parameter
-func StructToAnySlice(items any) ([]any, error) {
-	typ := UnwrapPointer(items)
-	if typ.Kind() == reflect.Struct {
-		return structToAnySliceBuilder(typ)
-	}
-
-	switch typ.Kind() {
-	case reflect.Array, reflect.Slice:
-	default:
-		return nil, ErrNotSlice
-	}
-
-	count := typ.Len()
-	if count == 0 {
-		return nil, ErrSliceZero
-	}
-
-	item := typ.Index(0)
-	if item.Kind() != reflect.Struct {
-		return nil, ErrNotStruct
-	}
-
-	slcs := make([]any, 0, (item.NumField() * count))
-	for i := range count {
-		slice, err := structToAnySliceBuilder(UnwrapPointer(typ.Index(i).Interface()))
-		if err != nil {
-			return nil, err
-		}
-
-		slcs = append(slcs, slice...)
-	}
-
-	return slcs, nil
-}
-
 func ValidateStruct(ctx context.Context, item any) error {
 	vl := validator.New()
 	err := vl.StructCtx(ctx, item)
@@ -150,15 +91,4 @@ func ValidateStruct(ctx context.Context, item any) error {
 	}
 
 	return nil
-}
-
-// Private
-func structToAnySliceBuilder(typ reflect.Value) ([]any, error) {
-	count := typ.NumField()
-	ret := make([]any, count)
-	for i := range count {
-		ret[i] = typ.Field(i).Interface()
-	}
-
-	return ret, nil
 }
