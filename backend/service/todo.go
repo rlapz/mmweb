@@ -47,6 +47,24 @@ func (s *Service) TodoAddItems(ctx context.Context, id int32, items []model.Todo
 	return s.repoTodo.InsertItems(ctx, items)
 }
 
+func (s *Service) TodoAddItem(ctx context.Context, item *model.TodoItem) error {
+	err := util.ValidateStruct(ctx, item)
+	if err != nil {
+		return err
+	}
+
+	isExists, err := s.repoTodo.ItemIsExists(ctx, item.IdTodo, item.Title)
+	if err != nil {
+		return err
+	}
+
+	if isExists {
+		return errorx.DataExists
+	}
+
+	return s.repoTodo.InsertItem(ctx, item)
+}
+
 func (s *Service) TodoGet(ctx context.Context, id int32) (*model.Todo, error) {
 	ret, err := s.repoTodo.SelectById(ctx, id)
 	if err != nil {

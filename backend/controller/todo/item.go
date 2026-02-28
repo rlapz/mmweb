@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"github.com/rlapz/mmweb/errorx"
+	"github.com/rlapz/mmweb/model"
 	"github.com/rlapz/mmweb/util"
 )
 
@@ -79,8 +80,25 @@ func (t *Todo) getItemList(w http.ResponseWriter, r *http.Request, id string) {
 }
 
 func (t *Todo) postItem(w http.ResponseWriter, r *http.Request) {
-	_ = r
-	util.HttpOk(w, "TODO", nil)
+	ctx := r.Context()
+	item, err := util.HttpJsonParseBody[model.TodoItem](r.Body)
+	if err != nil {
+		util.HttpErrBadRequest(w, "invalid body: "+err.Error())
+		return
+	}
+
+	err = t.service.TodoAddItem(ctx, item)
+	switch {
+	case err == nil: // ok
+	case errors.Is(err, errorx.DataExists), errors.Is(err, errorx.DataInvalid):
+		util.HttpErrBadRequest(w, err.Error())
+		return
+	default:
+		util.HttpErrInternal(w, err, "failed to add new item")
+		return
+	}
+
+	util.HttpOk(w, "ok", item)
 }
 
 func (t *Todo) putItem(w http.ResponseWriter, r *http.Request) {

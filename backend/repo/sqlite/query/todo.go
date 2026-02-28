@@ -17,6 +17,13 @@ const TodoIsExists = `
 	limit 1;
 `
 
+const TodoItemIsExists = `
+	select 1
+	from t_todo_item
+	where (id_todo = ?) and (title = ?)
+	limit 1;
+`
+
 const TodoSelectById = `
 	select id, id_user, label, created_at, updated_at
 	from t_todo

@@ -21,7 +21,7 @@ type TodoItem struct {
 	IdTodo      int32  `json:"id_todo" validate:"required"`
 	Title       string `json:"title" validate:"required"`
 	Description string `json:"description" validate:"required"`
-	Flags       int32  `json:"flags" validate:"required"`
+	Flags       int32  `json:"flags"`
 	CreatedAt   int64  `json:""`
 	UpdatedAt   *int64 `json:""`
 }

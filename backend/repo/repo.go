@@ -19,7 +19,9 @@ type Todo interface {
 	SelectItemById(ctx context.Context, id int32) (*model.TodoItem, error)
 	SelectItemsByTodoId(ctx context.Context, id int32) ([]model.TodoItem, error)
 	IsExists(ctx context.Context, label string, userId int32) (bool, error)
+	ItemIsExists(ctx context.Context, todoId int32, title string) (bool, error)
 	Insert(ctx context.Context, todo *model.Todo, userId int32) error
+	InsertItem(ctx context.Context, items *model.TodoItem) error
 	InsertItems(ctx context.Context, items []model.TodoItem) error
 	UpdateItemFlags(ctx context.Context, id, flags int32) error
 }

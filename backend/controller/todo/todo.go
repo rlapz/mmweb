@@ -94,7 +94,7 @@ func (t *Todo) post(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	todo, err := util.HttpJsonParseBody[model.Todo](r.Body)
 	if err != nil {
-		util.HttpErrBadRequest(w, "")
+		util.HttpErrBadRequest(w, "invalid body")
 		return
 	}
 

@@ -98,12 +98,36 @@ func (t *Todo) IsExists(ctx context.Context, label string, userId int32) (bool, 
 	return util.DbDataIsExists(row)
 }
 
+func (t *Todo) ItemIsExists(ctx context.Context, todoId int32, title string) (bool, error) {
+	conn := t.db.GetConn()
+	defer t.db.PutConn(conn)
+
+	row := conn.Db.QueryRowContext(ctx, query.TodoItemIsExists, todoId, title)
+	return util.DbDataIsExists(row)
+}
+
 func (t *Todo) Insert(ctx context.Context, todo *model.Todo, userId int32) error {
 	conn := t.db.GetConn()
 	defer t.db.PutConn(conn)
 
 	now := util.Now()
 	_, err := util.DbTryExec(ctx, conn.Db, query.TodoInsert, userId, todo.Label, now)
+	return err
+}
+
+func (t *Todo) InsertItem(ctx context.Context, item *model.TodoItem) error {
+	conn := t.db.GetConn()
+	defer t.db.PutConn(conn)
+
+	slcs := make([]any, 5)
+	slcs[0] = item.IdTodo
+	slcs[1] = item.Title
+	slcs[2] = item.Description
+	slcs[3] = item.Flags
+	slcs[4] = util.Now()
+
+	plc := util.DbSqlPlaceholderBuilder(len(slcs))
+	_, err := util.DbTryExec(ctx, conn.Db, query.TodoInsertItems+plc, slcs...)
 	return err
 }
 
@@ -120,8 +144,8 @@ func (t *Todo) InsertItems(ctx context.Context, items []model.TodoItem) error {
 		slcs = append(slcs, x.IdTodo, x.Title, x.Description, x.Flags, now)
 	}
 
-	plc, _ := util.DbSqlPlaceholder(slcs)
-	_, err := util.DbTryExec(ctx, conn.Db, query.TodoInsert+plc, slcs...)
+	plc := util.DbSqlPlaceholderBuilder(len(slcs))
+	_, err := util.DbTryExec(ctx, conn.Db, query.TodoInsertItems+plc, slcs...)
 	return err
 }
 
