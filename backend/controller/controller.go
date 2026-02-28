@@ -1,6 +1,8 @@
 package controller
 
 import (
+	"github.com/rlapz/mmweb/controller/auth"
+	"github.com/rlapz/mmweb/controller/todo"
 	"github.com/rlapz/mmweb/middleware"
 	"github.com/rlapz/mmweb/service"
 )
@@ -14,10 +16,7 @@ func Init(mid *middleware.Middleware, srv *service.Service) {
 	c.service = srv
 
 	mid.AddHandler("/", c.indexHandler, middleware.FLAG_AUTH_EXCLUDED)
-	mid.AddHandler("/login", c.loginHandler, middleware.FLAG_AUTH_EXCLUDED)
-	mid.AddHandler("/logout", c.logoutHandler, 0)
-	mid.AddHandler("/register", c.registerHandler, middleware.FLAG_AUTH_EXCLUDED)
 
-	mid.AddHandler("/todo", c.todoHandler, 0)
-	mid.AddHandler("/blog", c.blogHandler, 0)
+	auth.Init(mid, srv)
+	todo.Init(mid, srv)
 }

@@ -12,6 +12,7 @@ var (
 
 	NoDataSaved   = errors.New("no data saved")
 	NoDataUpdated = errors.New("no data updated")
+	NoDataFound   = errors.New("no data found")
 	DataInvalid   = errors.New("data invalid")
 	DataExists    = errors.New("data exists")
 )

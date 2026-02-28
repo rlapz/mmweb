@@ -6,6 +6,7 @@ import (
 	"github.com/rlapz/mmweb/model"
 )
 
+// TODO: add pagination for multiple items
 type Auth interface {
 	TokenInsert(ctx context.Context, token string, flags int) error
 	TokenUpdateFlags(ctx context.Context, token string, flags int) error
@@ -13,12 +14,14 @@ type Auth interface {
 }
 
 type Todo interface {
-	Insert(ctx context.Context, todo *model.Todo, userId int32) error
-	InsertItems(ctx context.Context, items []model.TodoItem) error
-	IsExists(ctx context.Context, label string, userId int32) (bool, error)
 	SelectById(ctx context.Context, id int32) (*model.Todo, error)
 	SelectByUserId(ctx context.Context, id int32) ([]model.Todo, error)
-	SelectItemsById(ctx context.Context, id int32) ([]model.TodoItem, error)
+	SelectItemById(ctx context.Context, id int32) (*model.TodoItem, error)
+	SelectItemsByTodoId(ctx context.Context, id int32) ([]model.TodoItem, error)
+	IsExists(ctx context.Context, label string, userId int32) (bool, error)
+	Insert(ctx context.Context, todo *model.Todo, userId int32) error
+	InsertItems(ctx context.Context, items []model.TodoItem) error
+	UpdateItemFlags(ctx context.Context, id, flags int32) error
 }
 
 type User interface {

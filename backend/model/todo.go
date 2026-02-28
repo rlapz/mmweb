@@ -1,5 +1,13 @@
 package model
 
+const (
+	TodoItemFlagPending   = 1 << 1
+	TodoItemFlagPostponed = 1 << 2
+	TodoItemFlagCancelled = 1 << 3
+	TodoItemFlagDone      = 1 << 4
+	TodoItemFlagDeleted   = 1 << 30
+)
+
 type Todo struct {
 	Id        int32  `json:"id"`
 	IdUser    int32  `json:"id_user"`

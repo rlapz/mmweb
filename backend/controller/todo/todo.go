@@ -1,60 +1,73 @@
-package controller
+package todo
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 	"strconv"
 
 	"github.com/rlapz/mmweb/errorx"
+	"github.com/rlapz/mmweb/middleware"
 	"github.com/rlapz/mmweb/model"
+	"github.com/rlapz/mmweb/service"
 	"github.com/rlapz/mmweb/util"
 )
 
-func (c *controller) todoHandler(w http.ResponseWriter, r *http.Request) {
+type Todo struct {
+	service *service.Service
+}
+
+func Init(mid *middleware.Middleware, serv *service.Service) {
+	t := new(Todo)
+	t.service = serv
+
+	mid.AddHandler("/todo", t.handler, 0)
+	mid.AddHandler("/todo/item", t.itemHandler, 0)
+}
+
+func (t *Todo) handler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
-		c.getTodo(w, r)
+		t.get(w, r)
 	case http.MethodPost:
-		c.postTodoItem(w, r)
+		t.post(w, r)
 	case http.MethodPut:
-		c.putTodoItem(w, r)
+		t.put(w, r)
 	case http.MethodDelete:
-		c.deleteTodoItem(w, r)
+		t.delete(w, r)
 	default:
 		util.HttpMethodCheck(w, r, "invalid")
 	}
 }
 
-func (c *controller) getTodo(w http.ResponseWriter, r *http.Request) {
+func (t *Todo) get(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query()
 	id := query.Get("id")
 	if id == "" {
-		c.getTodoList(w, r)
+		t.getList(w, r)
 		return
 	}
 
-	idInt, err := strconv.ParseInt(id, 10, 32)
+	idNum, err := strconv.ParseInt(id, 10, 32)
 	if err != nil {
-		util.HttpErrBadRequest(w, "invalid 'id' value")
+		util.HttpErrBadRequest(w, "invalid id")
 		return
 	}
 
-	data, err := c.service.TodoGet(r.Context(), int32(idInt))
-	if err != nil {
-		util.HttpErrInternal(w, err, "failed to get todo")
+	todo, err := t.service.TodoGet(r.Context(), int32(idNum))
+	switch {
+	case err == nil:
+	case errors.Is(err, errorx.NoDataFound):
+		util.HttpErrNotFound(w, err.Error())
+		return
+	default:
+		util.HttpErrInternal(w, err, "failed to get 'todo'")
 		return
 	}
 
-	if data == nil {
-		util.HttpErrNotFound(w, fmt.Sprintf("no data with 'id = %d'", idInt))
-		return
-	}
-
-	util.HttpOk(w, "ok", data)
+	util.HttpOk(w, "ok", todo)
 }
 
-func (c *controller) getTodoList(w http.ResponseWriter, r *http.Request) {
+func (t *Todo) getList(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	claims := util.ContextGetJwtClaims(ctx)
 	uname, err := claims.GetIssuer()
@@ -63,7 +76,7 @@ func (c *controller) getTodoList(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	list, err := c.service.TodoGetList(ctx, uname)
+	list, err := t.service.TodoGetList(ctx, uname)
 	if err != nil {
 		util.HttpErrInternal(w, err, "failed to get todo list")
 		return
@@ -77,7 +90,7 @@ func (c *controller) getTodoList(w http.ResponseWriter, r *http.Request) {
 	util.HttpOk(w, "ok", list)
 }
 
-func (c *controller) postTodoItem(w http.ResponseWriter, r *http.Request) {
+func (t *Todo) post(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	todo, err := util.HttpJsonParseBody[model.Todo](r.Body)
 	if err != nil {
@@ -92,10 +105,10 @@ func (c *controller) postTodoItem(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = c.service.TodoAdd(ctx, todo, uname)
+	err = t.service.TodoAdd(ctx, todo, uname)
 	switch {
 	case err == nil: // ok
-	case errors.Is(err, errorx.DataInvalid):
+	case errors.Is(err, errorx.DataExists), errors.Is(err, errorx.DataInvalid):
 		util.HttpErrBadRequest(w, err.Error())
 		return
 	default:
@@ -106,13 +119,13 @@ func (c *controller) postTodoItem(w http.ResponseWriter, r *http.Request) {
 	util.HttpCreated(w, "ok", todo)
 }
 
-func (c *controller) putTodoItem(w http.ResponseWriter, r *http.Request) {
+func (t *Todo) put(w http.ResponseWriter, r *http.Request) {
 	util.HttpOk(w, "TODO", nil)
 
 	_ = r
 }
 
-func (c *controller) deleteTodoItem(w http.ResponseWriter, r *http.Request) {
+func (t *Todo) delete(w http.ResponseWriter, r *http.Request) {
 	util.HttpOk(w, "TODO", nil)
 
 	_ = r
