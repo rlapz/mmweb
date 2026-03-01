@@ -148,3 +148,14 @@ func (s *Service) TodoUpdate(ctx context.Context, todo *model.Todo, uname string
 
 	return s.repoTodo.Update(ctx, todo)
 }
+
+func (s *Service) TodoUpdateItem(ctx context.Context, item *model.TodoItem) error {
+	err := util.ValidateStruct(ctx, item)
+	if err != nil {
+		return err
+	}
+
+	item.Title = strings.ToLower(item.Title)
+	item.Description = strings.ToLower(item.Description)
+	return s.repoTodo.UpdateItem(ctx, item)
+}

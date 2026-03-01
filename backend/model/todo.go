@@ -17,7 +17,7 @@ type Todo struct {
 }
 
 type TodoItem struct {
-	Id          int32  `json:"id"`
+	Id          int32  `json:"id" validate:"required"`
 	IdTodo      int32  `json:"id_todo" validate:"required"`
 	Title       string `json:"title" validate:"required"`
 	Description string `json:"description" validate:"required"`

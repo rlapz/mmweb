@@ -67,6 +67,25 @@ const TodoUpdate = `
 	where (t_todo.id = a.id) and (t_todo.label != a.label);
 `
 
+const TodoUpdateItem = `
+       with upd_src(id, title, description, deadline, status, updated_at) as (
+               values (?, ?, ?, ?, ?, ?)
+       )
+       update t_todo_item
+               set title = a.title,
+                   description = a.description,
+		   deadline = a.deadline,
+                   status = a.status,
+                   updated_at = a.updated_at 
+       from upd_src as a
+       where (t_todo_item.id = a.id) and (
+               (t_todo_item.title != a.title)
+               or (t_todo_item.deadline != a.deadline)
+               or (t_todo_item.description != a.description)
+               or (t_todo_item.status != a.status)
+       );
+`
+
 const TodoInsertHistory = `
 	insert into t_todo_history(id_todo, label, is_active, created_at)
 	select id, label, is_active, ?

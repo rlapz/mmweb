@@ -106,8 +106,25 @@ func (t *Todo) postItem(w http.ResponseWriter, r *http.Request) {
 }
 
 func (t *Todo) putItem(w http.ResponseWriter, r *http.Request) {
-	_ = r
-	util.HttpOk(w, "TODO", nil)
+	ctx := r.Context()
+	todo, err := util.HttpJsonParseBody[model.TodoItem](r.Body)
+	if err != nil {
+		util.HttpErrBadRequest(w, "invalid body")
+		return
+	}
+
+	err = t.service.TodoUpdateItem(ctx, todo)
+	switch {
+	case err == nil: // ok
+	case errors.Is(err, errorx.NoDataUpdated), errors.Is(err, errorx.DataInvalid):
+		util.HttpErrBadRequest(w, err.Error())
+		return
+	default:
+		util.HttpErrInternal(w, err, "failed to update an item")
+		return
+	}
+
+	util.HttpCreated(w, "ok", nil)
 }
 
 func (t *Todo) deleteItem(w http.ResponseWriter, r *http.Request) {
