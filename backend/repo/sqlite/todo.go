@@ -119,12 +119,13 @@ func (t *Todo) InsertItem(ctx context.Context, item *model.TodoItem) error {
 	conn := t.db.GetConn()
 	defer t.db.PutConn(conn)
 
-	slcs := make([]any, 5)
-	slcs[0] = item.IdTodo
-	slcs[1] = item.Title
-	slcs[2] = item.Description
-	slcs[3] = item.Flags
-	slcs[4] = util.Now()
+	slcs := []any{
+		item.IdTodo,
+		item.Title,
+		item.Description,
+		item.Flags,
+		util.Now(),
+	}
 
 	plc := util.DbSqlPlaceholder(len(slcs), 1)
 	_, err := util.DbTryExec(ctx, conn.Db, query.TodoInsertItems+plc, slcs...)
