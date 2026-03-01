@@ -120,9 +120,33 @@ func (t *Todo) post(w http.ResponseWriter, r *http.Request) {
 }
 
 func (t *Todo) put(w http.ResponseWriter, r *http.Request) {
-	util.HttpOk(w, "TODO", nil)
+	ctx := r.Context()
+	todo, err := util.HttpJsonParseBody[model.Todo](r.Body)
+	if err != nil {
+		util.HttpErrBadRequest(w, "invalid body")
+		return
+	}
 
 	_ = r
+	claims := util.ContextGetJwtClaims(ctx)
+	uname, err := claims.GetIssuer()
+	if err != nil {
+		util.HttpErrInternal(w, err, "failed to get context claims")
+		return
+	}
+
+	err = t.service.TodoUpdate(ctx, todo, uname)
+	switch {
+	case err == nil: // ok
+	case errors.Is(err, errorx.NoDataUpdated), errors.Is(err, errorx.DataExists):
+		util.HttpErrBadRequest(w, err.Error())
+		return
+	default:
+		util.HttpErrInternal(w, err, "failed to update todo")
+		return
+	}
+
+	util.HttpCreated(w, "ok", nil)
 }
 
 func (t *Todo) delete(w http.ResponseWriter, r *http.Request) {

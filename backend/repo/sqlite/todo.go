@@ -5,6 +5,7 @@ import (
 	"database/sql"
 
 	"github.com/rlapz/mmweb/db"
+	"github.com/rlapz/mmweb/errorx"
 	"github.com/rlapz/mmweb/model"
 	"github.com/rlapz/mmweb/repo/sqlite/query"
 	"github.com/rlapz/mmweb/util"
@@ -161,6 +162,37 @@ func (t *Todo) InsertItems(ctx context.Context, items []model.TodoItem) error {
 
 	plc := util.DbSqlPlaceholder(5, len(items))
 	_, err := util.DbTryExec(ctx, conn.Db, query.TodoInsertItems+plc, slcs...)
+	return err
+}
+
+func (t *Todo) Update(ctx context.Context, todo *model.Todo) error {
+	conn := t.db.GetConn()
+	defer t.db.PutConn(conn)
+
+	now := util.Now()
+	err := util.DbTxExecWithHandler(ctx, conn.Db, func(ctx context.Context, tx *sql.Tx, _ ...any) error {
+		_, err := util.DbTxTryExecPartial(ctx, tx, query.TodoInsertHistory, now, todo.Id)
+		if err != nil {
+			return err
+		}
+
+		res, err := util.DbTxTryExecPartial(ctx, tx, query.TodoUpdate, todo.Id, todo.Label, now)
+		if err != nil {
+			return err
+		}
+
+		num, err := res.RowsAffected()
+		if err != nil {
+			return err
+		}
+
+		if num == 0 {
+			return errorx.NoDataUpdated
+		}
+
+		return nil
+	})
+
 	return err
 }
 

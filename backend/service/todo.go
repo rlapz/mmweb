@@ -129,3 +129,22 @@ func (s *Service) TodoGetItem(ctx context.Context, id int32) (*model.TodoItem, e
 func (s *Service) TodoGetItemList(ctx context.Context, id int32) ([]model.TodoItem, error) {
 	return s.repoTodo.SelectItemsByTodoId(ctx, id)
 }
+
+func (s *Service) TodoUpdate(ctx context.Context, todo *model.Todo, uname string) error {
+	id, err := s.repoUser.SelectIdByName(ctx, uname)
+	if err != nil {
+		return err
+	}
+
+	todo.Label = strings.ToLower(todo.Label)
+	isExists, err := s.repoTodo.IsExists(ctx, todo.Label, id)
+	if err != nil {
+		return err
+	}
+
+	if isExists {
+		return errorx.DataExists
+	}
+
+	return s.repoTodo.Update(ctx, todo)
+}

@@ -56,6 +56,24 @@ const TodoSelectItemsByTodoId = `
 	where (id_todo = ?);
 `
 
+const TodoUpdate = `
+	with src_t(id, label, updated_at) as (
+		values(?, ?, ?)
+	)
+	update t_todo
+		set label = a.label,
+		    updated_at = a.updated_at
+	from src_t as a
+	where (t_todo.id = a.id) and (t_todo.label != a.label);
+`
+
+const TodoInsertHistory = `
+	insert into t_todo_history(id_todo, label, is_active, created_at)
+	select id, label, is_active, ?
+	from t_todo
+	where (id = ?);
+`
+
 const TodoUpdateItemStatus = `
 	update t_todo_item
 		set status = ?,

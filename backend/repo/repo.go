@@ -18,12 +18,16 @@ type Todo interface {
 	SelectByUserId(ctx context.Context, id int32) ([]model.Todo, error)
 	SelectItemById(ctx context.Context, id int32) (*model.TodoItem, error)
 	SelectItemsByTodoId(ctx context.Context, id int32) ([]model.TodoItem, error)
+
 	IsExists(ctx context.Context, label string, userId int32) (bool, error)
 	IsExistsById(ctx context.Context, id int32) (bool, error)
 	ItemIsExists(ctx context.Context, todoId int32, title string) (bool, error)
+
 	Insert(ctx context.Context, todo *model.Todo, userId int32) error
 	InsertItem(ctx context.Context, items *model.TodoItem) error
 	InsertItems(ctx context.Context, items []model.TodoItem) error
+
+	Update(ctx context.Context, todo *model.Todo) error
 	UpdateItemStatus(ctx context.Context, id, status int32) error
 }
 
