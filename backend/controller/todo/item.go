@@ -102,7 +102,7 @@ func (t *Todo) postItem(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	util.HttpOk(w, "ok", item)
+	util.HttpOk(w, "ok", nil)
 }
 
 func (t *Todo) putItem(w http.ResponseWriter, r *http.Request) {

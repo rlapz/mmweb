@@ -116,7 +116,7 @@ func (t *Todo) post(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	util.HttpCreated(w, "ok", todo)
+	util.HttpCreated(w, "ok", nil)
 }
 
 func (t *Todo) put(w http.ResponseWriter, r *http.Request) {
