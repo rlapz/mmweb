@@ -26,7 +26,8 @@ func (t *Todo) SelectById(ctx context.Context, id int32) (*model.Todo, error) {
 
 	ret := new(model.Todo)
 	row := conn.Db.QueryRowContext(ctx, query.TodoSelectById, id)
-	err := row.Scan(&ret.Id, &ret.IdUser, &ret.Label, &ret.CreatedAt, &ret.UpdatedAt)
+	err := row.Scan(&ret.Id, &ret.IdUser, &ret.Label, &ret.IsActive, &ret.CreatedAt,
+		&ret.UpdatedAt)
 	return ret, err
 }
 
@@ -43,7 +44,8 @@ func (t *Todo) SelectByUserId(ctx context.Context, id int32) ([]model.Todo, erro
 	var ret []model.Todo
 	for rows.Next() {
 		var item model.Todo
-		err = rows.Scan(&item.Id, &item.IdUser, &item.Label, &item.CreatedAt, &item.UpdatedAt)
+		err = rows.Scan(&item.Id, &item.IdUser, &item.Label, &item.IsActive,
+			&item.CreatedAt, &item.UpdatedAt)
 		if err != nil {
 			return nil, err
 		}
@@ -60,7 +62,8 @@ func (t *Todo) SelectItemById(ctx context.Context, id int32) (*model.TodoItem, e
 
 	ret := new(model.TodoItem)
 	row := conn.Db.QueryRowContext(ctx, query.TodoSelectItemById, id)
-	err := row.Scan(&ret.Id, &ret.IdTodo, &ret.Title, &ret.Description, &ret.Flags,
+	err := row.Scan(&ret.Id, &ret.IdTodo, &ret.Title, &ret.Description, &ret.Deadline,
+		&ret.Status,
 		&ret.CreatedAt, &ret.UpdatedAt)
 	return ret, err
 }
@@ -78,8 +81,8 @@ func (t *Todo) SelectItemsByTodoId(ctx context.Context, id int32) ([]model.TodoI
 	var ret []model.TodoItem
 	for rows.Next() {
 		var item model.TodoItem
-		err = rows.Scan(&item.Id, &item.IdTodo, &item.Title, &item.Description, &item.Flags,
-			&item.CreatedAt, &item.UpdatedAt)
+		err = rows.Scan(&item.Id, &item.IdTodo, &item.Title, &item.Description,
+			&item.Deadline, &item.Status, &item.CreatedAt, &item.UpdatedAt)
 		if err != nil {
 			return nil, err
 		}
@@ -111,7 +114,8 @@ func (t *Todo) Insert(ctx context.Context, todo *model.Todo, userId int32) error
 	defer t.db.PutConn(conn)
 
 	now := util.Now()
-	_, err := util.DbTryExec(ctx, conn.Db, query.TodoInsert, userId, todo.Label, now)
+	_, err := util.DbTryExec(ctx, conn.Db, query.TodoInsert, userId, todo.Label,
+		todo.IsActive, now)
 	return err
 }
 
@@ -123,7 +127,8 @@ func (t *Todo) InsertItem(ctx context.Context, item *model.TodoItem) error {
 		item.IdTodo,
 		item.Title,
 		item.Description,
-		item.Flags,
+		item.Deadline,
+		item.Status,
 		util.Now(),
 	}
 
@@ -142,7 +147,8 @@ func (t *Todo) InsertItems(ctx context.Context, items []model.TodoItem) error {
 	slcs := make([]any, 0, len(items)*5)
 	for i := range items {
 		x := &items[i]
-		slcs = append(slcs, x.IdTodo, x.Title, x.Description, x.Flags, now)
+		slcs = append(slcs, x.IdTodo, x.Title, x.Description, x.Deadline,
+			x.Status, now)
 	}
 
 	plc := util.DbSqlPlaceholder(5, len(items))
@@ -150,7 +156,7 @@ func (t *Todo) InsertItems(ctx context.Context, items []model.TodoItem) error {
 	return err
 }
 
-func (t *Todo) UpdateItemFlags(ctx context.Context, id, flags int32) error {
+func (t *Todo) UpdateItemStatus(ctx context.Context, id, status int32) error {
 	conn := t.db.GetConn()
 	defer t.db.PutConn(conn)
 
@@ -161,7 +167,7 @@ func (t *Todo) UpdateItemFlags(ctx context.Context, id, flags int32) error {
 			return err
 		}
 
-		_, err = util.DbTxTryExecPartial(ctx, tx, query.TodoUpdateItemFlags, flags, now, id)
+		_, err = util.DbTxTryExecPartial(ctx, tx, query.TodoUpdateItemStatus, status, now, id)
 		return err
 	})
 

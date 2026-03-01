@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"strings"
 
 	"github.com/rlapz/mmweb/errorx"
 	"github.com/rlapz/mmweb/model"
@@ -21,6 +22,8 @@ func (s *Service) TodoAdd(ctx context.Context, todo *model.Todo, uname string) e
 		return err
 	}
 
+	todo.IsActive = true
+	todo.Label = strings.ToLower(todo.Label)
 	isExists, err := s.repoTodo.IsExists(ctx, todo.Label, id)
 	if err != nil {
 		return err
@@ -42,6 +45,9 @@ func (s *Service) TodoAddItems(ctx context.Context, id int32, items []model.Todo
 		if err != nil {
 			return err
 		}
+
+		item.Title = strings.ToLower(item.Title)
+		item.Description = strings.ToLower(item.Description)
 	}
 
 	return s.repoTodo.InsertItems(ctx, items)
@@ -53,6 +59,8 @@ func (s *Service) TodoAddItem(ctx context.Context, item *model.TodoItem) error {
 		return err
 	}
 
+	item.Title = strings.ToLower(item.Title)
+	item.Description = strings.ToLower(item.Description)
 	isExists, err := s.repoTodo.ItemIsExists(ctx, item.IdTodo, item.Title)
 	if err != nil {
 		return err

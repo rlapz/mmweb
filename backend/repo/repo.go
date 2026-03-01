@@ -23,7 +23,7 @@ type Todo interface {
 	Insert(ctx context.Context, todo *model.Todo, userId int32) error
 	InsertItem(ctx context.Context, items *model.TodoItem) error
 	InsertItems(ctx context.Context, items []model.TodoItem) error
-	UpdateItemFlags(ctx context.Context, id, flags int32) error
+	UpdateItemStatus(ctx context.Context, id, status int32) error
 }
 
 type User interface {

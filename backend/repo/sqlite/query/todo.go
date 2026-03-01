@@ -1,12 +1,12 @@
 package query
 
 const TodoInsert = `
-	insert into t_todo(id_user, label, created_at)
-	values(?, ?, ?);
+	insert into t_todo(id_user, label, is_active, created_at)
+	values(?, ?, ?, ?);
 `
 
 const TodoInsertItems = `
-	insert into t_todo_item(id_todo, title, description, flags, created_at)
+	insert into t_todo_item(id_todo, title, description, deadline, status, created_at)
 	values
 `
 
@@ -25,41 +25,41 @@ const TodoItemIsExists = `
 `
 
 const TodoSelectById = `
-	select id, id_user, label, created_at, updated_at
+	select id, id_user, label, is_active, created_at, updated_at
 	from t_todo
 	where (id = ?);
 `
 
 const TodoSelectByUserId = `
-	select a.id, a.id_user, a.label, a.created_at, a.updated_at
+	select a.id, a.id_user, a.label, a.is_active, a.created_at, a.updated_at
 	from t_todo as a
 	join t_user as b on (b.id = a.id_user)
 	where (b.id = ?);
 `
 
 const TodoSelectItemById = `
-	select id, id_todo, title, description, flags, created_at, updated_at
+	select id, id_todo, title, description, deadline, status, created_at, updated_at
 	from t_todo_item
 	where (id = ?);
 `
 
 const TodoSelectItemsByTodoId = `
-	select id, id_todo, title, description, flags, created_at, updated_at
+	select id, id_todo, title, description, deadline, status, created_at, updated_at
 	from t_todo_item
 	where (id_todo = ?);
 `
 
-const TodoUpdateItemFlags = `
+const TodoUpdateItemStatus = `
 	update t_todo_item
-		set flags = ?,
+		set status = ?,
 		    updated_at = ?
 	where (id = ?);
 `
 
 const TodoInsertItemHistory = `
-	insert into t_todo_item_history(id_todo_item, title, description, flags,
+	insert into t_todo_item_history(id_todo_item, title, description, deadline, status,
 					created_at)
-	select id, title, description, flags, ?
+	select id, title, description, deadline, status, ?
 	from t_todo_item
 	where (id = ?);
 `
