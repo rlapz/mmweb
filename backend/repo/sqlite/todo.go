@@ -101,6 +101,14 @@ func (t *Todo) IsExists(ctx context.Context, label string, userId int32) (bool, 
 	return util.DbDataIsExists(row)
 }
 
+func (t *Todo) IsExistsById(ctx context.Context, id int32) (bool, error) {
+	conn := t.db.GetConn()
+	defer t.db.PutConn(conn)
+
+	row := conn.Db.QueryRowContext(ctx, query.TodoIsExistsById, id)
+	return util.DbDataIsExists(row)
+}
+
 func (t *Todo) ItemIsExists(ctx context.Context, todoId int32, title string) (bool, error) {
 	conn := t.db.GetConn()
 	defer t.db.PutConn(conn)

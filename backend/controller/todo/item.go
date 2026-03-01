@@ -91,6 +91,9 @@ func (t *Todo) postItem(w http.ResponseWriter, r *http.Request) {
 	err = t.service.TodoAddItem(ctx, item)
 	switch {
 	case err == nil: // ok
+	case errors.Is(err, errorx.NoDataFound):
+		util.HttpErrBadRequest(w, "no such todo")
+		return
 	case errors.Is(err, errorx.DataExists), errors.Is(err, errorx.DataInvalid):
 		util.HttpErrBadRequest(w, err.Error())
 		return

@@ -37,6 +37,15 @@ func (s *Service) TodoAdd(ctx context.Context, todo *model.Todo, uname string) e
 }
 
 func (s *Service) TodoAddItems(ctx context.Context, id int32, items []model.TodoItem) error {
+	isExists, err := s.repoTodo.IsExistsById(ctx, id)
+	if err != nil {
+		return err
+	}
+
+	if !isExists {
+		return errorx.NoDataFound
+	}
+
 	for i := range items {
 		item := &items[i]
 		item.IdTodo = id
@@ -59,9 +68,18 @@ func (s *Service) TodoAddItem(ctx context.Context, item *model.TodoItem) error {
 		return err
 	}
 
+	isExists, err := s.repoTodo.IsExistsById(ctx, item.Id)
+	if err != nil {
+		return err
+	}
+
+	if !isExists {
+		return errorx.NoDataFound
+	}
+
 	item.Title = strings.ToLower(item.Title)
 	item.Description = strings.ToLower(item.Description)
-	isExists, err := s.repoTodo.ItemIsExists(ctx, item.IdTodo, item.Title)
+	isExists, err = s.repoTodo.ItemIsExists(ctx, item.IdTodo, item.Title)
 	if err != nil {
 		return err
 	}

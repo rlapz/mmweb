@@ -17,6 +17,13 @@ const TodoIsExists = `
 	limit 1;
 `
 
+const TodoIsExistsById = `
+	select 1
+	from t_todo
+	where (id = ?)
+	limit 1;
+`
+
 const TodoItemIsExists = `
 	select 1
 	from t_todo_item
