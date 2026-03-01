@@ -8,7 +8,7 @@ import (
 
 func (c *controller) indexHandler(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/" {
-		util.HttpErrNotFound(w, "")
+		util.HttpErrNotFound(w, "invalid path")
 		return
 	}
 
