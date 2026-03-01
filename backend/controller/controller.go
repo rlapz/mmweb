@@ -15,7 +15,7 @@ func Init(mid *middleware.Middleware, srv *service.Service) {
 	c := new(controller)
 	c.service = srv
 
-	mid.AddHandler("/", c.indexHandler, middleware.FLAG_AUTH_EXCLUDED)
+	mid.AddHandler("/", c.indexHandler, 0)
 
 	auth.Init(mid, srv)
 	todo.Init(mid, srv)

@@ -19,9 +19,9 @@ func Init(mid *middleware.Middleware, serv *service.Service) {
 	a := new(Auth)
 	a.service = serv
 
-	mid.AddHandler("/login", a.login, middleware.FLAG_AUTH_EXCLUDED)
-	mid.AddHandler("/logout", a.logout, 0)
-	mid.AddHandler("/register", a.register, middleware.FLAG_AUTH_EXCLUDED)
+	mid.AddHandler("/auth/login", a.login, 0)
+	mid.AddHandler("/auth/logout", a.logout, middleware.FLAG_AUTH)
+	mid.AddHandler("/auth/register", a.register, 0)
 }
 
 func (a *Auth) login(w http.ResponseWriter, r *http.Request) {

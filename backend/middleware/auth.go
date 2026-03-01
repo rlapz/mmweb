@@ -12,7 +12,7 @@ const bear = "Bearer "
 
 func (m *Middleware) AuthHandler(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if m.authExcluded.Check(r.URL.Path) {
+		if !m.auth.Check(r.URL.Path) {
 			next.ServeHTTP(w, r)
 			return
 		}

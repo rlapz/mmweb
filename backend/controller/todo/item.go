@@ -24,6 +24,7 @@ func (t *Todo) itemHandler(w http.ResponseWriter, r *http.Request) {
 		util.HttpMethodCheck(w, r, "invalid")
 	}
 }
+
 func (t *Todo) getItem(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query()
 	todoId := query.Get("id_todo")
