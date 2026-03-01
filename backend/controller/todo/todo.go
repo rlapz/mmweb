@@ -150,7 +150,29 @@ func (t *Todo) put(w http.ResponseWriter, r *http.Request) {
 }
 
 func (t *Todo) delete(w http.ResponseWriter, r *http.Request) {
-	util.HttpOk(w, "TODO", nil)
+	query := r.URL.Query()
+	id := query.Get("id")
+	if id == "" {
+		t.getList(w, r)
+		return
+	}
 
-	_ = r
+	idNum, err := strconv.ParseInt(id, 10, 32)
+	if err != nil {
+		util.HttpErrBadRequest(w, "invalid id")
+		return
+	}
+
+	err = t.service.TodoDelete(r.Context(), int32(idNum))
+	switch {
+	case err == nil:
+	case errors.Is(err, errorx.NoDataFound):
+		util.HttpErrNotFound(w, err.Error())
+		return
+	default:
+		util.HttpErrInternal(w, err, "failed to delete 'todo'")
+		return
+	}
+
+	util.HttpOk(w, "ok", nil)
 }

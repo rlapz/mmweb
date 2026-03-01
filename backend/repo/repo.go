@@ -28,6 +28,7 @@ type Todo interface {
 	InsertItems(ctx context.Context, items []model.TodoItem) error
 
 	Update(ctx context.Context, todo *model.Todo) error
+	UpdateIsActive(ctx context.Context, id int32, isActive bool) error
 	UpdateItem(ctx context.Context, item *model.TodoItem) error
 	UpdateItemStatus(ctx context.Context, id, status int32) error
 }

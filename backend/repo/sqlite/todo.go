@@ -196,6 +196,37 @@ func (t *Todo) Update(ctx context.Context, todo *model.Todo) error {
 	return err
 }
 
+func (t *Todo) UpdateIsActive(ctx context.Context, id int32, isActive bool) error {
+	conn := t.db.GetConn()
+	defer t.db.PutConn(conn)
+
+	now := util.Now()
+	err := util.DbTxExecWithHandler(ctx, conn.Db, func(ctx context.Context, tx *sql.Tx, _ ...any) error {
+		_, err := util.DbTxTryExecPartial(ctx, tx, query.TodoInsertHistory, now, id)
+		if err != nil {
+			return err
+		}
+
+		res, err := util.DbTxTryExecPartial(ctx, tx, query.TodoUpdateIsActive, id, isActive, now)
+		if err != nil {
+			return err
+		}
+
+		num, err := res.RowsAffected()
+		if err != nil {
+			return err
+		}
+
+		if num == 0 {
+			return errorx.NoDataUpdated
+		}
+
+		return nil
+	})
+
+	return err
+}
+
 func (t *Todo) UpdateItem(ctx context.Context, item *model.TodoItem) error {
 	conn := t.db.GetConn()
 	defer t.db.PutConn(conn)

@@ -149,6 +149,19 @@ func (s *Service) TodoUpdate(ctx context.Context, todo *model.Todo, uname string
 	return s.repoTodo.Update(ctx, todo)
 }
 
+func (s *Service) TodoDelete(ctx context.Context, id int32) error {
+	isExists, err := s.repoTodo.IsExistsById(ctx, id)
+	if err != nil {
+		return err
+	}
+
+	if !isExists {
+		return errorx.NoDataFound
+	}
+
+	return s.repoTodo.UpdateIsActive(ctx, id, false)
+}
+
 func (s *Service) TodoUpdateItem(ctx context.Context, item *model.TodoItem) error {
 	err := util.ValidateStruct(ctx, item)
 	if err != nil {
