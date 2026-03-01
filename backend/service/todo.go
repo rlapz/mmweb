@@ -68,7 +68,7 @@ func (s *Service) TodoAddItem(ctx context.Context, item *model.TodoItem) error {
 		return err
 	}
 
-	isExists, err := s.repoTodo.IsExistsById(ctx, item.Id)
+	isExists, err := s.repoTodo.IsExistsById(ctx, item.IdTodo)
 	if err != nil {
 		return err
 	}
