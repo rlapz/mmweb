@@ -35,7 +35,7 @@ func (m *Middleware) AuthHandler(next http.Handler) http.Handler {
 			return
 		}
 
-		claims, err := m.service.AuthVerify(r.Context(), token[bearLen:])
+		ctx, err := m.service.AuthContextNew(r.Context(), token[bearLen:])
 		switch {
 		case err == nil: // OK
 		case errors.Is(err, errorx.AuthTokenInvalid):
@@ -46,8 +46,6 @@ func (m *Middleware) AuthHandler(next http.Handler) http.Handler {
 			return
 		}
 
-		util.ContextSetJwtClaims(&r, claims)
-
-		next.ServeHTTP(w, r)
+		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }

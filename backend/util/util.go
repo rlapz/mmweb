@@ -3,25 +3,16 @@ package util
 import (
 	"context"
 	"errors"
-	"net/http"
 	"time"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
-	"github.com/rlapz/mmweb/config"
 	"github.com/rlapz/mmweb/errorx"
 	"golang.org/x/crypto/bcrypt"
 )
 
-var (
-	ErrNotSlice   = errors.New("not a slice")
-	ErrNotStruct  = errors.New("no a struct")
-	ErrSliceZero  = errors.New("slice has zero item")
-	ErrStructZero = errors.New("slice has zero field")
-)
-
-func JwtMakeSignedToken(method *jwt.SigningMethodHMAC, key []byte, issuer string,
+func JwtNewToken(method *jwt.SigningMethodHMAC, key []byte, issuer string,
 	exp time.Duration) (string, error) {
 	now := time.Now()
 	token := jwt.NewWithClaims(method, jwt.MapClaims{
@@ -32,15 +23,6 @@ func JwtMakeSignedToken(method *jwt.SigningMethodHMAC, key []byte, issuer string
 	})
 
 	return token.SignedString(key)
-}
-
-func ContextSetJwtClaims(r **http.Request, cl jwt.MapClaims) {
-	ctx := context.WithValue(context.Background(), config.CLAIMS_CONTEXT_NAME, cl)
-	*r = (*r).WithContext(ctx)
-}
-
-func ContextGetJwtClaims(ctx context.Context) jwt.MapClaims {
-	return ctx.Value(config.CLAIMS_CONTEXT_NAME).(jwt.MapClaims)
 }
 
 func ContextSleep(ctx context.Context, dur time.Duration) error {

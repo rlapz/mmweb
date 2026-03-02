@@ -12,7 +12,7 @@ import (
 	"github.com/rlapz/mmweb/util"
 )
 
-func (s *Service) AuthVerify(ctx context.Context, token string) (jwt.MapClaims, error) {
+func (s *Service) AuthContextNew(ctx context.Context, token string) (context.Context, error) {
 	claims, err := s.authParseToken(token)
 	if err != nil {
 		return nil, errors.Join(errorx.AuthTokenInvalid, err)
@@ -32,7 +32,19 @@ func (s *Service) AuthVerify(ctx context.Context, token string) (jwt.MapClaims, 
 	}
 
 	claims[config.CLAIMS_USER_ID_NAME] = auth.IdUser
-	return claims, nil
+	return context.WithValue(context.Background(), config.CLAIMS_CONTEXT_NAME, claims), nil
+}
+
+func (s *Service) AuthContextGetClaims(ctx context.Context) jwt.MapClaims {
+	return ctx.Value(config.CLAIMS_CONTEXT_NAME).(jwt.MapClaims)
+}
+
+func (s *Service) AuthContextGetToken(ctx context.Context) string {
+	return s.AuthContextGetClaims(ctx)[config.CLAIMS_TOKEN_NAME].(string)
+}
+
+func (s *Service) AuthContextGetUserId(ctx context.Context) int32 {
+	return s.AuthContextGetClaims(ctx)[config.CLAIMS_USER_ID_NAME].(int32)
 }
 
 func (s *Service) AuthLogin(ctx context.Context, uname, passwd string) (string, error) {
@@ -49,7 +61,7 @@ func (s *Service) AuthLogin(ctx context.Context, uname, passwd string) (string, 
 		return "", errorx.AuthInvalidCredential
 	}
 
-	token, err := util.JwtMakeSignedToken(s.signMethod, s.signKey, user.Name, s.loginExp)
+	token, err := util.JwtNewToken(s.signMethod, s.signKey, user.Name, s.loginExp)
 	if err != nil {
 		return "", err
 	}
@@ -93,10 +105,6 @@ func (s *Service) AuthRegister(ctx context.Context, user *model.User) error {
 	}
 
 	return s.repoUser.Insert(ctx, user)
-}
-
-func (s *Service) AuthCtxGetUserId(ctx context.Context) int32 {
-	return util.ContextGetJwtClaims(ctx)[config.CLAIMS_USER_ID_NAME].(int32)
 }
 
 // Private

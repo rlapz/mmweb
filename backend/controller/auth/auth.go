@@ -55,10 +55,10 @@ func (a *Auth) logout(w http.ResponseWriter, r *http.Request) {
 	}
 
 	ctx := r.Context()
-	claims := util.ContextGetJwtClaims(ctx)
-	err := a.service.AuthLogout(ctx, claims["token"].(string))
+	token := a.service.AuthContextGetToken(ctx)
+	err := a.service.AuthLogout(ctx, token)
 	if err != nil {
-		util.HttpErrInternal(w, err, "failed to logged out")
+		util.HttpErrInternal(w, err, "failed to log out")
 		return
 	}
 

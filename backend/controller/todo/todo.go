@@ -69,7 +69,7 @@ func (t *Todo) get(w http.ResponseWriter, r *http.Request) {
 
 func (t *Todo) getList(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	userId := t.service.AuthCtxGetUserId(ctx)
+	userId := t.service.AuthContextGetUserId(ctx)
 	list, err := t.service.TodoGetList(ctx, userId)
 	if err != nil {
 		util.HttpErrInternal(w, err, "failed to get todo list")
@@ -92,7 +92,7 @@ func (t *Todo) post(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	todo.IdUser = t.service.AuthCtxGetUserId(ctx)
+	todo.IdUser = t.service.AuthContextGetUserId(ctx)
 	err = t.service.TodoAdd(ctx, todo)
 	switch {
 	case err == nil: // ok
@@ -115,7 +115,7 @@ func (t *Todo) put(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	todo.IdUser = t.service.AuthCtxGetUserId(ctx)
+	todo.IdUser = t.service.AuthContextGetUserId(ctx)
 	err = t.service.TodoUpdate(ctx, todo)
 	switch {
 	case err == nil: // ok
