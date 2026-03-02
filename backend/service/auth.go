@@ -95,7 +95,7 @@ func (s *Service) AuthRegister(ctx context.Context, user *model.User) error {
 	return s.repoUser.Insert(ctx, user)
 }
 
-func (s *Service) AuthGetUserId(ctx context.Context) int32 {
+func (s *Service) AuthCtxGetUserId(ctx context.Context) int32 {
 	return util.ContextGetJwtClaims(ctx)[config.CLAIMS_USER_ID_NAME].(int32)
 }
 
