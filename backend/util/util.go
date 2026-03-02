@@ -43,10 +43,6 @@ func ContextGetJwtClaims(ctx context.Context) jwt.MapClaims {
 	return ctx.Value(config.CLAIMS_CONTEXT_NAME).(jwt.MapClaims)
 }
 
-func ContextGetUserId(ctx context.Context) int32 {
-	return ContextGetJwtClaims(ctx)[config.CLAIMS_USER_ID_NAME].(int32)
-}
-
 func ContextSleep(ctx context.Context, dur time.Duration) error {
 	select {
 	case <-time.After(dur):

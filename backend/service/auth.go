@@ -95,6 +95,10 @@ func (s *Service) AuthRegister(ctx context.Context, user *model.User) error {
 	return s.repoUser.Insert(ctx, user)
 }
 
+func (s *Service) AuthGetUserId(ctx context.Context) int32 {
+	return util.ContextGetJwtClaims(ctx)[config.CLAIMS_USER_ID_NAME].(int32)
+}
+
 // Private
 func (s *Service) authParseToken(token string) (jwt.MapClaims, error) {
 	tokSigned, err := jwt.Parse(token, func(tok *jwt.Token) (any, error) {
