@@ -18,8 +18,6 @@ func (t *Todo) itemHandler(w http.ResponseWriter, r *http.Request) {
 		t.postItem(w, r)
 	case http.MethodPut:
 		t.putItem(w, r)
-	case http.MethodDelete:
-		t.deleteItem(w, r)
 	default:
 		util.HttpMethodCheck(w, r, "invalid")
 	}
@@ -125,9 +123,4 @@ func (t *Todo) putItem(w http.ResponseWriter, r *http.Request) {
 	}
 
 	util.HttpCreated(w, "ok", nil)
-}
-
-func (t *Todo) deleteItem(w http.ResponseWriter, r *http.Request) {
-	_ = r
-	util.HttpOk(w, "TODO", nil)
 }
