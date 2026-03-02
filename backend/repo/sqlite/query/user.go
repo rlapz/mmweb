@@ -1,17 +1,11 @@
 package query
 
-const UserSelectIdByName = `
-	select id
-	from t_user
-	where (uname = ?)
-`
-
-const UserSelectPasswordByName = `
-	select a.password
-	from t_user_detail as a
-	join t_user as b
-		on (b.id = a.id_user)
-	where (b.uname = ?);
+const UserSelectByName = `
+	select a.id, a.uname, b.first_name, b.last_name, b.email, b.password,
+	       b.flags, a.created_at, b.updated_at
+	from t_user as a
+	join t_user_detail as b on (b.id_user = a.id)
+	where (a.uname = ?)
 `
 
 const UserInsert = `

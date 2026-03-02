@@ -51,9 +51,11 @@ CREATE TABLE "t_user_detail_history" (
 -- always insert, can be updated
 CREATE TABLE "t_auth" (
 	"id"	        INTEGER NOT NULL,
+	"id_user"	INTEGER NOT NULL,
 	"token"	        TEXT UNIQUE NOT NULL,
 	"flags"         INTEGER NOT NULL,
-	PRIMARY KEY("id" AUTOINCREMENT)
+	PRIMARY KEY("id" AUTOINCREMENT),
+	FOREIGN KEY("id_user") REFERENCES "t_user"("id")
 );
 
 

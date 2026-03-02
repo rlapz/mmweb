@@ -11,20 +11,15 @@ import (
 	"github.com/rlapz/mmweb/util"
 )
 
-func (s *Service) TodoAdd(ctx context.Context, todo *model.Todo, uname string) error {
+func (s *Service) TodoAdd(ctx context.Context, todo *model.Todo) error {
 	err := util.ValidateStruct(ctx, todo)
-	if err != nil {
-		return err
-	}
-
-	id, err := s.repoUser.SelectIdByName(ctx, uname)
 	if err != nil {
 		return err
 	}
 
 	todo.IsActive = true
 	todo.Label = strings.ToLower(todo.Label)
-	isExists, err := s.repoTodo.IsExists(ctx, todo.Label, id)
+	isExists, err := s.repoTodo.IsExists(ctx, todo.Label, todo.IdUser)
 	if err != nil {
 		return err
 	}
@@ -33,7 +28,7 @@ func (s *Service) TodoAdd(ctx context.Context, todo *model.Todo, uname string) e
 		return errorx.DataExists
 	}
 
-	return s.repoTodo.Insert(ctx, todo, id)
+	return s.repoTodo.Insert(ctx, todo)
 }
 
 func (s *Service) TodoAddItems(ctx context.Context, id int32, items []model.TodoItem) error {
@@ -104,13 +99,8 @@ func (s *Service) TodoGet(ctx context.Context, id int32) (*model.Todo, error) {
 	return ret, nil
 }
 
-func (s *Service) TodoGetList(ctx context.Context, uname string) ([]model.Todo, error) {
-	id, err := s.repoUser.SelectIdByName(ctx, uname)
-	if err != nil {
-		return nil, err
-	}
-
-	return s.repoTodo.SelectByUserId(ctx, id)
+func (s *Service) TodoGetList(ctx context.Context, userId int32) ([]model.Todo, error) {
+	return s.repoTodo.SelectByUserId(ctx, userId)
 }
 
 func (s *Service) TodoGetItem(ctx context.Context, id int32) (*model.TodoItem, error) {
@@ -130,14 +120,9 @@ func (s *Service) TodoGetItemList(ctx context.Context, id int32) ([]model.TodoIt
 	return s.repoTodo.SelectItemsByTodoId(ctx, id)
 }
 
-func (s *Service) TodoUpdate(ctx context.Context, todo *model.Todo, uname string) error {
-	id, err := s.repoUser.SelectIdByName(ctx, uname)
-	if err != nil {
-		return err
-	}
-
+func (s *Service) TodoUpdate(ctx context.Context, todo *model.Todo) error {
 	todo.Label = strings.ToLower(todo.Label)
-	isExists, err := s.repoTodo.IsExists(ctx, todo.Label, id)
+	isExists, err := s.repoTodo.IsExists(ctx, todo.Label, todo.IdUser)
 	if err != nil {
 		return err
 	}

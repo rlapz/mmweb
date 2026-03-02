@@ -20,30 +20,19 @@ func UserNew(db *db.SqlitePool) *User {
 	}
 }
 
-func (u *User) SelectIdByName(ctx context.Context, uname string) (int32, error) {
+func (u *User) SelectByName(ctx context.Context, uname string) (*model.User, error) {
 	conn := u.db.GetConn()
 	defer u.db.PutConn(conn)
 
-	var id int32
-	row := conn.Db.QueryRowContext(ctx, query.UserSelectIdByName, uname)
-	if err := row.Scan(&id); err != nil {
-		return 0, err
+	ret := new(model.User)
+	row := conn.Db.QueryRowContext(ctx, query.UserSelectByName, uname)
+	err := row.Scan(&ret.Id, &ret.Name, &ret.FirstName, &ret.LastName, &ret.Email,
+		&ret.Password, &ret.Flags, &ret.CreatedAt, &ret.UpdatedAt)
+	if err != nil {
+		return nil, err
 	}
 
-	return id, nil
-}
-
-func (u *User) SelectPasswordByName(ctx context.Context, uname string) (string, error) {
-	conn := u.db.GetConn()
-	defer u.db.PutConn(conn)
-
-	var passwd string
-	row := conn.Db.QueryRowContext(ctx, query.UserSelectPasswordByName, uname)
-	if err := row.Scan(&passwd); err != nil {
-		return "", err
-	}
-
-	return passwd, nil
+	return ret, nil
 }
 
 func (u *User) Insert(ctx context.Context, user *model.User) error {

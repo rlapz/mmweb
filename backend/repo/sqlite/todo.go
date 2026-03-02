@@ -118,12 +118,12 @@ func (t *Todo) ItemIsExists(ctx context.Context, todoId int32, title string) (bo
 	return util.DbDataIsExists(row)
 }
 
-func (t *Todo) Insert(ctx context.Context, todo *model.Todo, userId int32) error {
+func (t *Todo) Insert(ctx context.Context, todo *model.Todo) error {
 	conn := t.db.GetConn()
 	defer t.db.PutConn(conn)
 
 	now := util.Now()
-	_, err := util.DbTryExec(ctx, conn.Db, query.TodoInsert, userId, todo.Label,
+	_, err := util.DbTryExec(ctx, conn.Db, query.TodoInsert, todo.IdUser, todo.Label,
 		todo.IsActive, now)
 	return err
 }

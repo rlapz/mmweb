@@ -69,14 +69,8 @@ func (t *Todo) get(w http.ResponseWriter, r *http.Request) {
 
 func (t *Todo) getList(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	claims := util.ContextGetJwtClaims(ctx)
-	uname, err := claims.GetIssuer()
-	if err != nil {
-		util.HttpErrInternal(w, err, "failed to get claims context")
-		return
-	}
-
-	list, err := t.service.TodoGetList(ctx, uname)
+	userId := util.ContextGetUserId(ctx)
+	list, err := t.service.TodoGetList(ctx, userId)
 	if err != nil {
 		util.HttpErrInternal(w, err, "failed to get todo list")
 		return
@@ -98,14 +92,8 @@ func (t *Todo) post(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	claims := util.ContextGetJwtClaims(ctx)
-	uname, err := claims.GetIssuer()
-	if err != nil {
-		util.HttpErrInternal(w, err, "failed to get context claims")
-		return
-	}
-
-	err = t.service.TodoAdd(ctx, todo, uname)
+	todo.IdUser = util.ContextGetUserId(ctx)
+	err = t.service.TodoAdd(ctx, todo)
 	switch {
 	case err == nil: // ok
 	case errors.Is(err, errorx.DataExists), errors.Is(err, errorx.DataInvalid):
@@ -127,15 +115,8 @@ func (t *Todo) put(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_ = r
-	claims := util.ContextGetJwtClaims(ctx)
-	uname, err := claims.GetIssuer()
-	if err != nil {
-		util.HttpErrInternal(w, err, "failed to get context claims")
-		return
-	}
-
-	err = t.service.TodoUpdate(ctx, todo, uname)
+	todo.IdUser = util.ContextGetUserId(ctx)
+	err = t.service.TodoUpdate(ctx, todo)
 	switch {
 	case err == nil: // ok
 	case errors.Is(err, errorx.NoDataUpdated), errors.Is(err, errorx.DataExists):

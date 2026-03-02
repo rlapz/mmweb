@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/rlapz/mmweb/db"
+	"github.com/rlapz/mmweb/model"
 	"github.com/rlapz/mmweb/repo/sqlite/query"
 	"github.com/rlapz/mmweb/util"
 )
@@ -18,31 +19,32 @@ func AuthNew(db *db.SqlitePool) *Auth {
 	}
 }
 
-func (a *Auth) TokenInsert(ctx context.Context, token string, flags int) error {
+func (a *Auth) SelectByToken(ctx context.Context, token string) (*model.Auth, error) {
 	conn := a.db.GetConn()
 	defer a.db.PutConn(conn)
 
-	_, err := util.DbTryExec(ctx, conn.Db, query.AuthTokenInsert, token, flags)
-	return err
-}
-
-func (a *Auth) TokenUpdateFlags(ctx context.Context, token string, flags int) error {
-	conn := a.db.GetConn()
-	defer a.db.PutConn(conn)
-
-	_, err := util.DbTryExec(ctx, conn.Db, query.AuthTokenUpdateFlags, flags, token)
-	return err
-}
-
-func (a *Auth) TokenSelectFlags(ctx context.Context, token string) (int, error) {
-	conn := a.db.GetConn()
-	defer a.db.PutConn(conn)
-
-	var ret int
-	row := conn.Db.QueryRowContext(ctx, query.AuthTokenSelectFlags, token)
-	if err := row.Scan(&ret); err != nil {
-		return -1, err
+	ret := new(model.Auth)
+	row := conn.Db.QueryRowContext(ctx, query.AuthSelectByToken, token)
+	if err := row.Scan(&ret.Id, &ret.IdUser, &ret.Token, &ret.Flags); err != nil {
+		return nil, err
 	}
 
 	return ret, nil
+}
+
+func (a *Auth) Insert(ctx context.Context, auth *model.Auth) error {
+	conn := a.db.GetConn()
+	defer a.db.PutConn(conn)
+
+	_, err := util.DbTryExec(ctx, conn.Db, query.AuthInsert, auth.IdUser, auth.Token,
+		auth.Flags)
+	return err
+}
+
+func (a *Auth) UpdateFlagsByToken(ctx context.Context, token string, flags int32) error {
+	conn := a.db.GetConn()
+	defer a.db.PutConn(conn)
+
+	_, err := util.DbTryExec(ctx, conn.Db, query.AuthUdateFlagsByToken, flags, token)
+	return err
 }
