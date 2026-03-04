@@ -90,7 +90,7 @@ func (s *Service) AuthRegister(ctx context.Context, user *model.User) error {
 		return err
 	}
 
-	isExists, err := s.repoUser.IsExists(ctx, user.Name)
+	isExists, err := s.repoUser.IsExistsByName(ctx, user.Name)
 	if err != nil {
 		return err
 	}

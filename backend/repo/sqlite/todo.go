@@ -27,8 +27,7 @@ func (t *Todo) SelectById(ctx context.Context, id int32) (*model.Todo, error) {
 
 	ret := new(model.Todo)
 	row := conn.Db.QueryRowContext(ctx, query.TodoSelectById, id)
-	err := row.Scan(&ret.Id, &ret.IdUser, &ret.Label, &ret.IsActive, &ret.CreatedAt,
-		&ret.UpdatedAt)
+	err := row.Scan(&ret.Id, &ret.IdUser, &ret.Label, &ret.IsActive, &ret.CreatedAt, &ret.UpdatedAt)
 	return ret, err
 }
 
@@ -45,8 +44,8 @@ func (t *Todo) SelectByUserId(ctx context.Context, id int32) ([]model.Todo, erro
 	var ret []model.Todo
 	for rows.Next() {
 		var item model.Todo
-		err = rows.Scan(&item.Id, &item.IdUser, &item.Label, &item.IsActive,
-			&item.CreatedAt, &item.UpdatedAt)
+		err = rows.Scan(&item.Id, &item.IdUser, &item.Label, &item.IsActive, &item.CreatedAt,
+			&item.UpdatedAt)
 		if err != nil {
 			return nil, err
 		}
@@ -63,8 +62,7 @@ func (t *Todo) SelectItemById(ctx context.Context, id int32) (*model.TodoItem, e
 
 	ret := new(model.TodoItem)
 	row := conn.Db.QueryRowContext(ctx, query.TodoSelectItemById, id)
-	err := row.Scan(&ret.Id, &ret.IdTodo, &ret.Title, &ret.Description, &ret.Deadline,
-		&ret.Status,
+	err := row.Scan(&ret.Id, &ret.IdTodo, &ret.Title, &ret.Description, &ret.Deadline, &ret.Status,
 		&ret.CreatedAt, &ret.UpdatedAt)
 	return ret, err
 }
@@ -82,8 +80,8 @@ func (t *Todo) SelectItemsByTodoId(ctx context.Context, id int32) ([]model.TodoI
 	var ret []model.TodoItem
 	for rows.Next() {
 		var item model.TodoItem
-		err = rows.Scan(&item.Id, &item.IdTodo, &item.Title, &item.Description,
-			&item.Deadline, &item.Status, &item.CreatedAt, &item.UpdatedAt)
+		err = rows.Scan(&item.Id, &item.IdTodo, &item.Title, &item.Description, &item.Deadline,
+			&item.Status, &item.CreatedAt, &item.UpdatedAt)
 		if err != nil {
 			return nil, err
 		}
@@ -94,7 +92,7 @@ func (t *Todo) SelectItemsByTodoId(ctx context.Context, id int32) ([]model.TodoI
 	return ret, nil
 }
 
-func (t *Todo) IsExists(ctx context.Context, label string, userId int32) (bool, error) {
+func (t *Todo) IsExistsByLabel(ctx context.Context, label string, userId int32) (bool, error) {
 	conn := t.db.GetConn()
 	defer t.db.PutConn(conn)
 
@@ -102,7 +100,7 @@ func (t *Todo) IsExists(ctx context.Context, label string, userId int32) (bool, 
 	return util.DbDataIsExists(row)
 }
 
-func (t *Todo) IsExistsById(ctx context.Context, id int32) (bool, error) {
+func (t *Todo) IsExists(ctx context.Context, id int32) (bool, error) {
 	conn := t.db.GetConn()
 	defer t.db.PutConn(conn)
 
@@ -110,7 +108,7 @@ func (t *Todo) IsExistsById(ctx context.Context, id int32) (bool, error) {
 	return util.DbDataIsExists(row)
 }
 
-func (t *Todo) ItemIsExists(ctx context.Context, todoId int32, title string) (bool, error) {
+func (t *Todo) ItemIsExistsByTitle(ctx context.Context, todoId int32, title string) (bool, error) {
 	conn := t.db.GetConn()
 	defer t.db.PutConn(conn)
 
@@ -238,8 +236,8 @@ func (t *Todo) UpdateItem(ctx context.Context, item *model.TodoItem) error {
 			return err
 		}
 
-		res, err := util.DbTxTryExecPartial(ctx, tx, query.TodoUpdateItem, item.Id,
-			item.Title, item.Description, item.Deadline, item.Status, now)
+		res, err := util.DbTxTryExecPartial(ctx, tx, query.TodoUpdateItem, item.Id, item.Title,
+			item.Description, item.Deadline, item.Status, now)
 		if err != nil {
 			return err
 		}

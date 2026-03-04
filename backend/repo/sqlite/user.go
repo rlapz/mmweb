@@ -26,8 +26,8 @@ func (u *User) SelectByName(ctx context.Context, uname string) (*model.User, err
 
 	ret := new(model.User)
 	row := conn.Db.QueryRowContext(ctx, query.UserSelectByName, uname)
-	err := row.Scan(&ret.Id, &ret.Name, &ret.FirstName, &ret.LastName, &ret.Email,
-		&ret.Password, &ret.Flags, &ret.CreatedAt, &ret.UpdatedAt)
+	err := row.Scan(&ret.Id, &ret.Name, &ret.FirstName, &ret.LastName, &ret.Email, &ret.Password,
+		&ret.Flags, &ret.CreatedAt, &ret.UpdatedAt)
 	if err != nil {
 		return nil, err
 	}
@@ -52,8 +52,7 @@ func (u *User) Insert(ctx context.Context, user *model.User) error {
 		}
 
 		res, err = util.DbTxTryExecPartial(ctx, tx, query.UserDetailInsert, int(id),
-			user.FirstName, user.LastName, user.Email, user.Password, user.Flags,
-			now)
+			user.FirstName, user.LastName, user.Email, user.Password, user.Flags, now)
 		if err != nil {
 			return err
 		}
@@ -64,7 +63,7 @@ func (u *User) Insert(ctx context.Context, user *model.User) error {
 	return err
 }
 
-func (u *User) IsExists(ctx context.Context, uname string) (bool, error) {
+func (u *User) IsExistsByName(ctx context.Context, uname string) (bool, error) {
 	conn := u.db.GetConn()
 	defer u.db.PutConn(conn)
 

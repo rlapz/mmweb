@@ -19,7 +19,7 @@ func (s *Service) TodoAdd(ctx context.Context, todo *model.Todo) error {
 
 	todo.IsActive = true
 	todo.Label = strings.ToLower(todo.Label)
-	isExists, err := s.repoTodo.IsExists(ctx, todo.Label, todo.IdUser)
+	isExists, err := s.repoTodo.IsExistsByLabel(ctx, todo.Label, todo.IdUser)
 	if err != nil {
 		return err
 	}
@@ -32,7 +32,7 @@ func (s *Service) TodoAdd(ctx context.Context, todo *model.Todo) error {
 }
 
 func (s *Service) TodoAddItems(ctx context.Context, id int32, items []model.TodoItem) error {
-	isExists, err := s.repoTodo.IsExistsById(ctx, id)
+	isExists, err := s.repoTodo.IsExists(ctx, id)
 	if err != nil {
 		return err
 	}
@@ -63,7 +63,7 @@ func (s *Service) TodoAddItem(ctx context.Context, item *model.TodoItem) error {
 		return err
 	}
 
-	isExists, err := s.repoTodo.IsExistsById(ctx, item.IdTodo)
+	isExists, err := s.repoTodo.IsExists(ctx, item.IdTodo)
 	if err != nil {
 		return err
 	}
@@ -74,7 +74,7 @@ func (s *Service) TodoAddItem(ctx context.Context, item *model.TodoItem) error {
 
 	item.Title = strings.ToLower(item.Title)
 	item.Description = strings.ToLower(item.Description)
-	isExists, err = s.repoTodo.ItemIsExists(ctx, item.IdTodo, item.Title)
+	isExists, err = s.repoTodo.ItemIsExistsByTitle(ctx, item.IdTodo, item.Title)
 	if err != nil {
 		return err
 	}
@@ -122,7 +122,7 @@ func (s *Service) TodoGetItemList(ctx context.Context, id int32) ([]model.TodoIt
 
 func (s *Service) TodoUpdate(ctx context.Context, todo *model.Todo) error {
 	todo.Label = strings.ToLower(todo.Label)
-	isExists, err := s.repoTodo.IsExists(ctx, todo.Label, todo.IdUser)
+	isExists, err := s.repoTodo.IsExistsByLabel(ctx, todo.Label, todo.IdUser)
 	if err != nil {
 		return err
 	}
@@ -135,7 +135,7 @@ func (s *Service) TodoUpdate(ctx context.Context, todo *model.Todo) error {
 }
 
 func (s *Service) TodoDelete(ctx context.Context, id int32) error {
-	isExists, err := s.repoTodo.IsExistsById(ctx, id)
+	isExists, err := s.repoTodo.IsExists(ctx, id)
 	if err != nil {
 		return err
 	}

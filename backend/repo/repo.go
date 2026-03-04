@@ -19,9 +19,9 @@ type Todo interface {
 	SelectItemById(ctx context.Context, id int32) (*model.TodoItem, error)
 	SelectItemsByTodoId(ctx context.Context, id int32) ([]model.TodoItem, error)
 
-	IsExists(ctx context.Context, label string, userId int32) (bool, error)
-	IsExistsById(ctx context.Context, id int32) (bool, error)
-	ItemIsExists(ctx context.Context, todoId int32, title string) (bool, error)
+	IsExists(ctx context.Context, id int32) (bool, error)
+	IsExistsByLabel(ctx context.Context, label string, userId int32) (bool, error)
+	ItemIsExistsByTitle(ctx context.Context, todoId int32, title string) (bool, error)
 
 	Insert(ctx context.Context, todo *model.Todo) error
 	InsertItem(ctx context.Context, items *model.TodoItem) error
@@ -36,5 +36,5 @@ type Todo interface {
 type User interface {
 	SelectByName(ctx context.Context, uname string) (*model.User, error)
 	Insert(ctx context.Context, user *model.User) error
-	IsExists(ctx context.Context, uname string) (bool, error)
+	IsExistsByName(ctx context.Context, uname string) (bool, error)
 }
