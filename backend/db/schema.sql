@@ -54,8 +54,20 @@ CREATE TABLE "t_auth" (
 	"id_user"	INTEGER NOT NULL,
 	"token"	        TEXT UNIQUE NOT NULL,
 	"flags"         INTEGER NOT NULL,
+	"updated_at"	TIMESTAMP,
 	PRIMARY KEY("id" AUTOINCREMENT),
 	FOREIGN KEY("id_user") REFERENCES "t_user"("id")
+);
+
+-- always insert
+CREATE TABLE "t_auth_history" (
+	"id"	        INTEGER NOT NULL,
+	"id_auth"	INTEGER NOT NULL,
+	"token"	        TEXT UNIQUE NOT NULL,
+	"flags"         INTEGER NOT NULL,
+	"created_at"	TIMESTAMP NOT NULL,
+	PRIMARY KEY("id" AUTOINCREMENT),
+	FOREIGN KEY("id_auth") REFERENCES "t_auth"("id")
 );
 
 

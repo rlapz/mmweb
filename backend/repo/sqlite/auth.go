@@ -2,8 +2,10 @@ package sqlite
 
 import (
 	"context"
+	"database/sql"
 
 	"github.com/rlapz/mmweb/db"
+	"github.com/rlapz/mmweb/errorx"
 	"github.com/rlapz/mmweb/model"
 	"github.com/rlapz/mmweb/repo/sqlite/query"
 	"github.com/rlapz/mmweb/util"
@@ -45,6 +47,27 @@ func (a *Auth) UpdateFlagsByToken(ctx context.Context, token string, flags int32
 	conn := a.db.GetConn()
 	defer a.db.PutConn(conn)
 
-	_, err := util.DbTryExec(ctx, conn.Db, query.AuthUdateFlagsByToken, flags, token)
-	return err
+	now := util.Now()
+	return util.DbTxExecWithHandler(ctx, conn.Db, func(ctx context.Context, tx *sql.Tx, _ ...any) error {
+		_, err := util.DbTxTryExecPartial(ctx, tx, query.AuthInsertHistory, now, token)
+		if err != nil {
+			return err
+		}
+
+		res, err := util.DbTxTryExecPartial(ctx, tx, query.AuthUdateFlagsByToken, flags, now, token)
+		if err != nil {
+			return err
+		}
+
+		num, err := res.RowsAffected()
+		if err != nil {
+			return err
+		}
+
+		if num == 0 {
+			return errorx.NoDataUpdated
+		}
+
+		return nil
+	})
 }
