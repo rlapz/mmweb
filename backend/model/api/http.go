@@ -1,14 +1,11 @@
-package util
+package api
 
 import (
 	"encoding/json"
 	"fmt"
-	"io"
 	"log"
 	"net/http"
 	"strings"
-
-	"github.com/rlapz/mmweb/model/api"
 )
 
 func HttpErrInternal(w http.ResponseWriter, err error, msg string) {
@@ -28,7 +25,7 @@ func HttpErrUnauthorized(w http.ResponseWriter, msg string) {
 }
 
 func HttpOk(w http.ResponseWriter, msg string, data any) {
-	resp := api.ApiResp{
+	resp := ApiResp{
 		Success: true,
 		Message: msg,
 		Data:    data,
@@ -38,7 +35,7 @@ func HttpOk(w http.ResponseWriter, msg string, data any) {
 }
 
 func HttpCreated(w http.ResponseWriter, msg string, data any) {
-	resp := api.ApiResp{
+	resp := ApiResp{
 		Success: true,
 		Message: msg,
 		Data:    data,
@@ -56,17 +53,8 @@ func HttpMethodCheck(w http.ResponseWriter, r *http.Request, expected string) bo
 	return true
 }
 
-func HttpJsonParseBody[T any](reader io.Reader) (*T, error) {
-	ret := new(T)
-	if err := json.NewDecoder(reader).Decode(ret); err != nil {
-		return nil, err
-	}
-
-	return ret, nil
-}
-
 // Private
-func httpResp(w http.ResponseWriter, code int, resp *api.ApiResp) {
+func httpResp(w http.ResponseWriter, code int, resp *ApiResp) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)
 
@@ -85,7 +73,7 @@ func httpRespErr(w http.ResponseWriter, err error, errCode int, def string, msg 
 		fmt.Fprint(&stb, ": ", msg)
 	}
 
-	resp := api.ApiResp{
+	resp := ApiResp{
 		Message: stb.String(),
 	}
 

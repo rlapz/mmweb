@@ -1,9 +1,12 @@
 package controller
 
 import (
+	"net/http"
+
 	"github.com/rlapz/mmweb/controller/auth"
 	"github.com/rlapz/mmweb/controller/todo"
 	"github.com/rlapz/mmweb/middleware"
+	"github.com/rlapz/mmweb/model/api"
 	"github.com/rlapz/mmweb/service"
 )
 
@@ -19,4 +22,13 @@ func Init(mid *middleware.Middleware, srv *service.Service) {
 
 	auth.Init(mid, srv)
 	todo.Init(mid, srv)
+}
+
+func (c *controller) indexHandler(w http.ResponseWriter, r *http.Request) {
+	if r.URL.Path != "/" {
+		api.HttpErrNotFound(w, "invalid path")
+		return
+	}
+
+	api.HttpOk(w, "ok", nil)
 }

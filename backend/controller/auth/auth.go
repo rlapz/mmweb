@@ -7,6 +7,7 @@ import (
 	"github.com/rlapz/mmweb/errorx"
 	"github.com/rlapz/mmweb/middleware"
 	"github.com/rlapz/mmweb/model"
+	"github.com/rlapz/mmweb/model/api"
 	"github.com/rlapz/mmweb/service"
 	"github.com/rlapz/mmweb/util"
 )
@@ -25,13 +26,13 @@ func Init(mid *middleware.Middleware, serv *service.Service) {
 }
 
 func (a *Auth) login(w http.ResponseWriter, r *http.Request) {
-	if !util.HttpMethodCheck(w, r, http.MethodPost) {
+	if !api.HttpMethodCheck(w, r, http.MethodPost) {
 		return
 	}
 
 	uname, pswd, ok := r.BasicAuth()
 	if !ok || (uname == "") || (pswd == "") {
-		util.HttpErrBadRequest(w, "invalid username or password")
+		api.HttpErrBadRequest(w, "invalid username or password")
 		return
 	}
 
@@ -39,18 +40,18 @@ func (a *Auth) login(w http.ResponseWriter, r *http.Request) {
 	switch {
 	case err == nil: // ok
 	case errors.Is(err, errorx.AuthInvalidCredential):
-		util.HttpErrUnauthorized(w, err.Error())
+		api.HttpErrUnauthorized(w, err.Error())
 		return
 	default:
-		util.HttpErrInternal(w, err, "failed to authenticate credential")
+		api.HttpErrInternal(w, err, "failed to authenticate credential")
 		return
 	}
 
-	util.HttpOk(w, "ok", token)
+	api.HttpOk(w, "ok", token)
 }
 
 func (a *Auth) logout(w http.ResponseWriter, r *http.Request) {
-	if !util.HttpMethodCheck(w, r, http.MethodPost) {
+	if !api.HttpMethodCheck(w, r, http.MethodPost) {
 		return
 	}
 
@@ -58,22 +59,22 @@ func (a *Auth) logout(w http.ResponseWriter, r *http.Request) {
 	token := a.service.AuthContextGetToken(ctx)
 	err := a.service.AuthLogout(ctx, token)
 	if err != nil {
-		util.HttpErrInternal(w, err, "failed to log out")
+		api.HttpErrInternal(w, err, "failed to log out")
 		return
 	}
 
-	util.HttpCreated(w, "ok", nil)
+	api.HttpCreated(w, "ok", nil)
 }
 
 func (a *Auth) register(w http.ResponseWriter, r *http.Request) {
-	if !util.HttpMethodCheck(w, r, http.MethodPost) {
+	if !api.HttpMethodCheck(w, r, http.MethodPost) {
 		return
 	}
 
 	ctx := r.Context()
-	user, err := util.HttpJsonParseBody[model.User](r.Body)
+	user, err := util.ParseJsonReader[model.User](r.Body)
 	if err != nil {
-		util.HttpErrBadRequest(w, err.Error())
+		api.HttpErrBadRequest(w, err.Error())
 		return
 	}
 
@@ -81,16 +82,16 @@ func (a *Auth) register(w http.ResponseWriter, r *http.Request) {
 	switch {
 	case err == nil:
 	case errors.Is(err, errorx.DataInvalid):
-		util.HttpErrBadRequest(w, err.Error())
+		api.HttpErrBadRequest(w, err.Error())
 		return
 	case errors.Is(err, errorx.DataExists):
-		util.HttpErrBadRequest(w, "such user already exists!")
+		api.HttpErrBadRequest(w, "such user already exists!")
 		return
 	default:
-		util.HttpErrInternal(w, err, "failed to add new item")
+		api.HttpErrInternal(w, err, "failed to add new item")
 		return
 	}
 
 	user.Password = "***"
-	util.HttpCreated(w, "ok", user)
+	api.HttpCreated(w, "ok", user)
 }

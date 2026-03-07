@@ -8,6 +8,7 @@ import (
 	"github.com/rlapz/mmweb/errorx"
 	"github.com/rlapz/mmweb/middleware"
 	"github.com/rlapz/mmweb/model"
+	"github.com/rlapz/mmweb/model/api"
 	"github.com/rlapz/mmweb/service"
 	"github.com/rlapz/mmweb/util"
 )
@@ -35,7 +36,7 @@ func (t *Todo) handler(w http.ResponseWriter, r *http.Request) {
 	case http.MethodDelete:
 		t.delete(w, r)
 	default:
-		util.HttpMethodCheck(w, r, "invalid")
+		api.HttpMethodCheck(w, r, "invalid")
 	}
 }
 
@@ -49,7 +50,7 @@ func (t *Todo) get(w http.ResponseWriter, r *http.Request) {
 
 	idNum, err := strconv.ParseInt(id, 10, 32)
 	if err != nil {
-		util.HttpErrBadRequest(w, "invalid id")
+		api.HttpErrBadRequest(w, "invalid id")
 		return
 	}
 
@@ -57,14 +58,14 @@ func (t *Todo) get(w http.ResponseWriter, r *http.Request) {
 	switch {
 	case err == nil:
 	case errors.Is(err, errorx.NoDataFound):
-		util.HttpErrNotFound(w, err.Error())
+		api.HttpErrNotFound(w, err.Error())
 		return
 	default:
-		util.HttpErrInternal(w, err, "failed to get 'todo'")
+		api.HttpErrInternal(w, err, "failed to get 'todo'")
 		return
 	}
 
-	util.HttpOk(w, "ok", todo)
+	api.HttpOk(w, "ok", todo)
 }
 
 func (t *Todo) getList(w http.ResponseWriter, r *http.Request) {
@@ -72,23 +73,23 @@ func (t *Todo) getList(w http.ResponseWriter, r *http.Request) {
 	userId := t.service.AuthContextGetUserId(ctx)
 	list, err := t.service.TodoGetList(ctx, userId)
 	if err != nil {
-		util.HttpErrInternal(w, err, "failed to get todo list")
+		api.HttpErrInternal(w, err, "failed to get todo list")
 		return
 	}
 
 	if len(list) == 0 {
-		util.HttpErrNotFound(w, "no data")
+		api.HttpErrNotFound(w, "no data")
 		return
 	}
 
-	util.HttpOk(w, "ok", list)
+	api.HttpOk(w, "ok", list)
 }
 
 func (t *Todo) post(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	todo, err := util.HttpJsonParseBody[model.Todo](r.Body)
+	todo, err := util.ParseJsonReader[model.Todo](r.Body)
 	if err != nil {
-		util.HttpErrBadRequest(w, "invalid body")
+		api.HttpErrBadRequest(w, "invalid body")
 		return
 	}
 
@@ -97,21 +98,21 @@ func (t *Todo) post(w http.ResponseWriter, r *http.Request) {
 	switch {
 	case err == nil: // ok
 	case errors.Is(err, errorx.DataExists), errors.Is(err, errorx.DataInvalid):
-		util.HttpErrBadRequest(w, err.Error())
+		api.HttpErrBadRequest(w, err.Error())
 		return
 	default:
-		util.HttpErrInternal(w, err, "failed to add new item")
+		api.HttpErrInternal(w, err, "failed to add new item")
 		return
 	}
 
-	util.HttpCreated(w, "ok", nil)
+	api.HttpCreated(w, "ok", nil)
 }
 
 func (t *Todo) put(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	todo, err := util.HttpJsonParseBody[model.Todo](r.Body)
+	todo, err := util.ParseJsonReader[model.Todo](r.Body)
 	if err != nil {
-		util.HttpErrBadRequest(w, "invalid body")
+		api.HttpErrBadRequest(w, "invalid body")
 		return
 	}
 
@@ -120,14 +121,14 @@ func (t *Todo) put(w http.ResponseWriter, r *http.Request) {
 	switch {
 	case err == nil: // ok
 	case errors.Is(err, errorx.NoDataUpdated), errors.Is(err, errorx.DataExists):
-		util.HttpErrBadRequest(w, err.Error())
+		api.HttpErrBadRequest(w, err.Error())
 		return
 	default:
-		util.HttpErrInternal(w, err, "failed to update todo")
+		api.HttpErrInternal(w, err, "failed to update todo")
 		return
 	}
 
-	util.HttpCreated(w, "ok", nil)
+	api.HttpCreated(w, "ok", nil)
 }
 
 func (t *Todo) delete(w http.ResponseWriter, r *http.Request) {
@@ -140,7 +141,7 @@ func (t *Todo) delete(w http.ResponseWriter, r *http.Request) {
 
 	idNum, err := strconv.ParseInt(id, 10, 32)
 	if err != nil {
-		util.HttpErrBadRequest(w, "invalid id")
+		api.HttpErrBadRequest(w, "invalid id")
 		return
 	}
 
@@ -148,12 +149,12 @@ func (t *Todo) delete(w http.ResponseWriter, r *http.Request) {
 	switch {
 	case err == nil:
 	case errors.Is(err, errorx.NoDataFound):
-		util.HttpErrNotFound(w, err.Error())
+		api.HttpErrNotFound(w, err.Error())
 		return
 	default:
-		util.HttpErrInternal(w, err, "failed to delete 'todo'")
+		api.HttpErrInternal(w, err, "failed to delete 'todo'")
 		return
 	}
 
-	util.HttpOk(w, "ok", nil)
+	api.HttpOk(w, "ok", nil)
 }

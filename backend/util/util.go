@@ -2,7 +2,10 @@ package util
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
+	"io"
+	"strconv"
 	"time"
 
 	"github.com/go-playground/validator/v10"
@@ -73,4 +76,22 @@ func ValidateStruct(ctx context.Context, item any) error {
 	}
 
 	return nil
+}
+
+func ParseInt(str string) int {
+	val, err := strconv.ParseInt(str, 10, 32)
+	if err != nil {
+		return -1
+	}
+
+	return int(val)
+}
+
+func ParseJsonReader[T any](reader io.Reader) (*T, error) {
+	ret := new(T)
+	if err := json.NewDecoder(reader).Decode(ret); err != nil {
+		return nil, err
+	}
+
+	return ret, nil
 }

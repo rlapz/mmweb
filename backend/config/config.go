@@ -16,6 +16,9 @@ const (
 	CLAIMS_TOKEN_NAME   = "token"
 	CLAIMS_USER_ID_NAME = "user_id"
 
+	DEF_RECORD_MIN_PER_PAGE_COUNT = 25
+	DEF_RECORD_MAX_PER_PAGE_COUNT = 100
+
 	DB_TRY_MAX  = 5
 	DB_TRY_WAIT = time.Millisecond * 100
 
