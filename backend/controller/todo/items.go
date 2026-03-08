@@ -1,6 +1,7 @@
 package todo
 
 import (
+	"log"
 	"net/http"
 	"strconv"
 
@@ -44,6 +45,13 @@ func (t *Todo) getItemList(w http.ResponseWriter, r *http.Request) {
 	}
 
 	/* TODO */
-	pag := model.Pagination{}
-	api.HttpOkWithPagination(w, "ok", list, &pag)
+	pag := model.Pagination{
+		Page:    1,
+		PageCap: 10,
+	}
+	xpag := api.ResponsePaginationNew(query, &pag)
+
+	log.Println(xpag)
+
+	api.HttpOkWithPagination(w, "ok", list, xpag)
 }

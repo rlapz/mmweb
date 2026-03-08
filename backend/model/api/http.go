@@ -41,12 +41,12 @@ func HttpOk(w http.ResponseWriter, msg string, data any) {
 	httpResp(w, http.StatusOK, &resp)
 }
 
-func HttpOkWithPagination(w http.ResponseWriter, msg string, data any, pag *model.Pagination) {
+func HttpOkWithPagination(w http.ResponseWriter, msg string, data any, pag *ResponsePagination) {
 	resp := Response{
 		Success:    true,
 		Message:    msg,
 		Data:       data,
-		Pagination: ResponsePaginationNew(pag),
+		Pagination: pag,
 	}
 
 	httpResp(w, http.StatusOK, &resp)
@@ -74,7 +74,7 @@ func HttpMethodCheck(w http.ResponseWriter, r *http.Request, expected string) bo
 /*
  * ResponsePagination
  */
-func ResponsePaginationNew(pag *model.Pagination) *ResponsePagination {
+func ResponsePaginationNew(query *RequestQuery, pag *model.Pagination) *ResponsePagination {
 	p := new(ResponsePagination)
 	p.Page = pag.Page
 	p.ListCap = pag.PageCap
@@ -82,15 +82,19 @@ func ResponsePaginationNew(pag *model.Pagination) *ResponsePagination {
 	p.ListLen = pag.ListLen
 	p.ListCap = pag.ListCap
 	p.Sort = p.Order
+	if query.Path == "" {
+		return p
+	}
 
+	q := util.Cnd((query.Path == ""), "?", fmt.Sprintf("?%s&", query.Path))
 	if p.Page < p.PageCap {
-		p.PageNext = fmt.Sprintf("/?page=%d&list_limit=%d&sort=%s&order=%s",
-			p.Page+1, p.ListLimit, p.Sort, p.Order)
+		p.PageNext = fmt.Sprintf("%s%spage=%d&list_limit=%d&sort=%s&order=%s",
+			query.Path, q, p.Page+1, p.ListLimit, p.Sort, p.Order)
 	}
 
 	if p.Page > 0 {
-		p.PagePrev = fmt.Sprintf("/?page=%d&list_limit=%d&sort=%s&order=%s",
-			p.Page-1, p.ListLimit, p.Sort, p.Order)
+		p.PagePrev = fmt.Sprintf("%s%spage=%d&list_limit=%d&sort=%s&order=%s",
+			query.Path, q, p.Page-1, p.ListLimit, p.Sort, p.Order)
 	}
 
 	return p
@@ -112,6 +116,7 @@ func RequestQueryParse(r *http.Request) *RequestQuery {
 		ListLimit: limit,
 		Page:      page,
 		Offset:    (page - 1) * limit,
+		Path:      r.URL.Path,
 		Query:     raw,
 	}
 }
