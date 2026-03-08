@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/rlapz/mmweb/config"
+	"github.com/rlapz/mmweb/model"
 	"github.com/rlapz/mmweb/util"
 )
 
@@ -40,12 +41,12 @@ func HttpOk(w http.ResponseWriter, msg string, data any) {
 	httpResp(w, http.StatusOK, &resp)
 }
 
-func HttpOkWithPagination(w http.ResponseWriter, msg string, data any, pag *ResponsePagination) {
+func HttpOkWithPagination(w http.ResponseWriter, msg string, data any, pag *model.Pagination) {
 	resp := Response{
 		Success:    true,
 		Message:    msg,
 		Data:       data,
-		Pagination: pag,
+		Pagination: ResponsePaginationNew(pag),
 	}
 
 	httpResp(w, http.StatusOK, &resp)
@@ -73,16 +74,26 @@ func HttpMethodCheck(w http.ResponseWriter, r *http.Request, expected string) bo
 /*
  * ResponsePagination
  */
-func (p *ResponsePagination) BuildNavs(baseUrl string) {
+func ResponsePaginationNew(pag *model.Pagination) *ResponsePagination {
+	p := new(ResponsePagination)
+	p.Page = pag.Page
+	p.ListCap = pag.PageCap
+	p.ListLimit = pag.ListLimit
+	p.ListLen = pag.ListLen
+	p.ListCap = pag.ListCap
+	p.Sort = p.Order
+
 	if p.Page < p.PageCap {
-		p.PageNext = fmt.Sprintf("%s/?page=%d&list_limit=%d&sort=%s&order=%s", baseUrl,
+		p.PageNext = fmt.Sprintf("/?page=%d&list_limit=%d&sort=%s&order=%s",
 			p.Page+1, p.ListLimit, p.Sort, p.Order)
 	}
 
 	if p.Page > 0 {
-		p.PagePrev = fmt.Sprintf("%s/?page=%d&list_limit=%d&sort=%s&order=%s", baseUrl,
+		p.PagePrev = fmt.Sprintf("%s/?page=%d&list_limit=%d&sort=%s&order=%s",
 			p.Page-1, p.ListLimit, p.Sort, p.Order)
 	}
+
+	return p
 }
 
 /*

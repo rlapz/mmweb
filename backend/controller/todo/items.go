@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/rlapz/mmweb/model"
 	"github.com/rlapz/mmweb/model/api"
 )
 
@@ -43,6 +44,6 @@ func (t *Todo) getItemList(w http.ResponseWriter, r *http.Request) {
 	}
 
 	/* TODO */
-	pag := api.ResponsePagination{}
+	pag := model.Pagination{}
 	api.HttpOkWithPagination(w, "ok", list, &pag)
 }
