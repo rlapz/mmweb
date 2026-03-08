@@ -23,6 +23,7 @@ func Init(mid *middleware.Middleware, serv *service.Service) {
 
 	mid.AddHandler("/todo", t.handler, middleware.FLAG_AUTH)
 	mid.AddHandler("/todo/item", t.itemHandler, middleware.FLAG_AUTH)
+	mid.AddHandler("/todo/items", t.itemsHandler, middleware.FLAG_AUTH)
 }
 
 func (t *Todo) handler(w http.ResponseWriter, r *http.Request) {

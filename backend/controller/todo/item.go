@@ -27,15 +27,9 @@ func (t *Todo) itemHandler(w http.ResponseWriter, r *http.Request) {
 func (t *Todo) getItem(w http.ResponseWriter, r *http.Request) {
 	query := api.RequestQueryParse(r)
 
-	todoId := query.Get("id_todo")
-	if todoId == "" {
-		api.HttpErrBadRequest(w, "no 'id_todo' parameter found")
-		return
-	}
-
 	id := query.Id
 	if id == "" {
-		t.getItemList(w, r, todoId)
+		api.HttpErrBadRequest(w, "no 'id' parameter found")
 		return
 	}
 
@@ -57,27 +51,6 @@ func (t *Todo) getItem(w http.ResponseWriter, r *http.Request) {
 	}
 
 	api.HttpOk(w, "ok", item)
-}
-
-func (t *Todo) getItemList(w http.ResponseWriter, r *http.Request, id string) {
-	idInt, err := strconv.ParseInt(id, 10, 32)
-	if err != nil {
-		api.HttpErrBadRequest(w, "invalid 'id_todo'")
-		return
-	}
-
-	list, err := t.service.TodoGetItemList(r.Context(), int32(idInt))
-	if err != nil {
-		api.HttpErrInternal(w, err, "failed to get todo items")
-		return
-	}
-
-	if len(list) == 0 {
-		api.HttpErrNotFound(w, "no data found")
-		return
-	}
-
-	api.HttpOk(w, "ok", list)
 }
 
 func (t *Todo) postItem(w http.ResponseWriter, r *http.Request) {
