@@ -268,8 +268,21 @@ func (t *Todo) UpdateItemStatus(ctx context.Context, id, status int32) error {
 			return err
 		}
 
-		_, err = util.DbTxTryExecPartial(ctx, tx, query.TodoUpdateItemStatus, status, now, id)
-		return err
+		res, err := util.DbTxTryExecPartial(ctx, tx, query.TodoUpdateItemStatus, status, now, id)
+		if err != nil {
+			return err
+		}
+
+		num, err := util.DbTryRowsAffected(ctx, res)
+		if err != nil {
+			return err
+		}
+
+		if num == 0 {
+			return errorx.NoDataUpdated
+		}
+
+		return nil
 	})
 
 	return err
