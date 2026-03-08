@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"fmt"
 	"strings"
 
 	"github.com/rlapz/mmweb/config"
@@ -136,15 +135,20 @@ func DbSqlPlaceholder(cols, rows int) string {
 		return ""
 	}
 
-	if rows == 1 {
-		return dbSqlPlaceholderCols(cols)
-	}
-
 	var stb strings.Builder
 	stb.Grow((((rows * 2) + 1) * cols) + (rows - 1))
 	for range rows {
-		plc := dbSqlPlaceholderCols(cols)
-		fmt.Fprintf(&stb, "%s,", plc)
+		stb.WriteByte('(')
+		for j := range cols {
+			if j < (cols - 1) {
+				stb.WriteString("?,")
+				continue
+			}
+
+			stb.WriteByte('?')
+		}
+
+		stb.WriteString("),")
 	}
 
 	return stb.String()[:stb.Len()-1]
@@ -162,16 +166,4 @@ func DbDataIsExists(row *sql.Row) (bool, error) {
 	}
 
 	return isExists, nil
-}
-
-// Private
-func dbSqlPlaceholderCols(count int) string {
-	var stb strings.Builder
-	stb.Grow(1 + (2 * count))
-	stb.WriteString("(")
-	for range count {
-		stb.WriteString("?,")
-	}
-
-	return stb.String()[:stb.Len()-1] + ")"
 }
