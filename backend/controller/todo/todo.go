@@ -41,8 +41,9 @@ func (t *Todo) handler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (t *Todo) get(w http.ResponseWriter, r *http.Request) {
-	query := r.URL.Query()
-	id := query.Get("id")
+	query := api.RequestQueryParse(r)
+
+	id := query.Id
 	if id == "" {
 		t.getList(w, r)
 		return
@@ -132,8 +133,9 @@ func (t *Todo) put(w http.ResponseWriter, r *http.Request) {
 }
 
 func (t *Todo) delete(w http.ResponseWriter, r *http.Request) {
-	query := r.URL.Query()
-	id := query.Get("id")
+	query := api.RequestQueryParse(r)
+
+	id := query.Id
 	if id == "" {
 		t.getList(w, r)
 		return

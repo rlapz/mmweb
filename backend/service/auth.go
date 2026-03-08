@@ -107,7 +107,9 @@ func (s *Service) AuthRegister(ctx context.Context, user *model.User) error {
 	return s.repoUser.Insert(ctx, user)
 }
 
-// Private
+/**************
+ * Private    *
+ **************/
 func (s *Service) authParseToken(token string) (jwt.MapClaims, error) {
 	tokSigned, err := jwt.Parse(token, func(tok *jwt.Token) (any, error) {
 		mth, ok := tok.Method.(*jwt.SigningMethodHMAC)

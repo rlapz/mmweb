@@ -6,8 +6,14 @@ import (
 	"log"
 	"net/http"
 	"strings"
+
+	"github.com/rlapz/mmweb/config"
+	"github.com/rlapz/mmweb/util"
 )
 
+/*
+ * Http
+ */
 func HttpErrInternal(w http.ResponseWriter, err error, msg string) {
 	httpRespErr(w, err, http.StatusInternalServerError, "internal", msg)
 }
@@ -25,7 +31,7 @@ func HttpErrUnauthorized(w http.ResponseWriter, msg string) {
 }
 
 func HttpOk(w http.ResponseWriter, msg string, data any) {
-	resp := ApiResp{
+	resp := Response{
 		Success: true,
 		Message: msg,
 		Data:    data,
@@ -34,8 +40,19 @@ func HttpOk(w http.ResponseWriter, msg string, data any) {
 	httpResp(w, http.StatusOK, &resp)
 }
 
+func HttpOkWithPagination(w http.ResponseWriter, msg string, data any, pag *ResponsePagination) {
+	resp := Response{
+		Success:    true,
+		Message:    msg,
+		Data:       data,
+		Pagination: pag,
+	}
+
+	httpResp(w, http.StatusOK, &resp)
+}
+
 func HttpCreated(w http.ResponseWriter, msg string, data any) {
-	resp := ApiResp{
+	resp := Response{
 		Success: true,
 		Message: msg,
 		Data:    data,
@@ -53,8 +70,49 @@ func HttpMethodCheck(w http.ResponseWriter, r *http.Request, expected string) bo
 	return true
 }
 
-// Private
-func httpResp(w http.ResponseWriter, code int, resp *ApiResp) {
+/*
+ * ResponsePagination
+ */
+func (p *ResponsePagination) BuildNavs(baseUrl string) {
+	if p.Page < p.PageCap {
+		p.PageNext = fmt.Sprintf("%s/?page=%d&list_limit=%d&sort=%s&order=%s", baseUrl,
+			p.Page+1, p.ListLimit, p.Sort, p.Order)
+	}
+
+	if p.Page > 0 {
+		p.PagePrev = fmt.Sprintf("%s/?page=%d&list_limit=%d&sort=%s&order=%s", baseUrl,
+			p.Page-1, p.ListLimit, p.Sort, p.Order)
+	}
+}
+
+/*
+ * RequestQuery
+ */
+func RequestQueryParse(r *http.Request) *RequestQuery {
+	raw := r.URL.Query()
+	page := max(util.ParseInt(raw.Get("page")), 1)
+	limit := max(util.ParseInt(raw.Get("limit")), config.DEF_RECORD_MIN_PER_PAGE_COUNT)
+	limit = min(limit, config.DEF_RECORD_MAX_PER_PAGE_COUNT)
+
+	return &RequestQuery{
+		Id:        raw.Get("id"),
+		Sort:      raw.Get("sort"),
+		Order:     raw.Get("order"),
+		ListLimit: limit,
+		Page:      page,
+		Offset:    (page - 1) * limit,
+		Query:     raw,
+	}
+}
+
+func (q *RequestQuery) Get(key string) string {
+	return q.Query.Get(key)
+}
+
+/**************
+ * Private    *
+ **************/
+func httpResp(w http.ResponseWriter, code int, resp *Response) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)
 
@@ -73,7 +131,7 @@ func httpRespErr(w http.ResponseWriter, err error, errCode int, def string, msg 
 		fmt.Fprint(&stb, ": ", msg)
 	}
 
-	resp := ApiResp{
+	resp := Response{
 		Message: stb.String(),
 	}
 

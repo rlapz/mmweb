@@ -2,7 +2,6 @@ package todo
 
 import (
 	"errors"
-	"log"
 	"net/http"
 	"strconv"
 
@@ -26,12 +25,7 @@ func (t *Todo) itemHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (t *Todo) getItem(w http.ResponseWriter, r *http.Request) {
-	query := r.URL.Query()
-
-	var abq api.ApiBaseQuery
-	abq.Parse(query)
-
-	log.Println(abq)
+	query := api.RequestQueryParse(r)
 
 	todoId := query.Get("id_todo")
 	if todoId == "" {
@@ -39,7 +33,7 @@ func (t *Todo) getItem(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id := query.Get("id")
+	id := query.Id
 	if id == "" {
 		t.getItemList(w, r, todoId)
 		return
