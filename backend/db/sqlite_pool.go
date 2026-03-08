@@ -28,10 +28,10 @@ func SqlitePoolNew(path string, initSize int) (*SqlitePool, error) {
 			return nil, err
 		}
 
-		conn := new(SqlitePoolConn)
-		conn.inPool = true
-		conn.Db = db
-		pool.push(conn)
+		pool.push(&SqlitePoolConn{
+			inPool: true,
+			Db:     db,
+		})
 	}
 
 	pool.path = path
@@ -47,17 +47,19 @@ func (s *SqlitePool) GetConn() *SqlitePoolConn {
 	conn := s.pop()
 	s.mutex.Unlock()
 
-	if conn == nil {
-		conn = new(SqlitePoolConn)
-		db, err := openSqliteConn(s.path)
-		if err != nil {
-			return nil
-		}
-
-		conn.Db = db
+	if conn != nil {
+		return conn
 	}
 
-	return conn
+	// create a new one
+	db, err := openSqliteConn(s.path)
+	if err != nil {
+		return nil
+	}
+
+	return &SqlitePoolConn{
+		Db: db,
+	}
 }
 
 func (s *SqlitePool) PutConn(conn *SqlitePoolConn) {
@@ -93,7 +95,7 @@ func (s *SqlitePool) closeAll() {
 	for {
 		conn := s.pop()
 		if conn == nil {
-			return
+			break
 		}
 
 		log.Println("closing db conn:", conn)
