@@ -89,7 +89,7 @@ func ResponsePaginationNew(pag *model.Pagination) *ResponsePagination {
 	}
 
 	if p.Page > 0 {
-		p.PagePrev = fmt.Sprintf("%s/?page=%d&list_limit=%d&sort=%s&order=%s",
+		p.PagePrev = fmt.Sprintf("/?page=%d&list_limit=%d&sort=%s&order=%s",
 			p.Page-1, p.ListLimit, p.Sort, p.Order)
 	}
 
