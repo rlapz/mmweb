@@ -29,6 +29,5 @@ type RequestQuery struct {
 	Sort      string
 	Order     string
 	Offset    int
-	Path      string
 	Query     url.Values
 }

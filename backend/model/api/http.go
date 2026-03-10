@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/rlapz/mmweb/config"
 	"github.com/rlapz/mmweb/model"
-	"github.com/rlapz/mmweb/util"
 )
 
 /*
@@ -75,29 +75,14 @@ func HttpMethodCheck(w http.ResponseWriter, r *http.Request, expected string) bo
  * ResponsePagination
  */
 func ResponsePaginationNew(query *RequestQuery, pag *model.Pagination) *ResponsePagination {
-	p := new(ResponsePagination)
-	p.Page = pag.Page
-	p.ListCap = pag.PageCap
-	p.ListLimit = pag.ListLimit
-	p.ListLen = pag.ListLen
-	p.ListCap = pag.ListCap
-	p.Sort = p.Order
-	if query.Path == "" {
-		return p
+	return &ResponsePagination{
+		Page:      pag.Page,
+		PageCap:   pag.PageCap,
+		ListLimit: pag.ListLimit,
+		ListLen:   pag.ListLen,
+		ListCap:   pag.ListCap,
+		Sort:      pag.Order,
 	}
-
-	q := util.Cnd((query.Path == ""), "?", fmt.Sprintf("?%s&", query.Path))
-	if p.Page < p.PageCap {
-		p.PageNext = fmt.Sprintf("%s%spage=%d&list_limit=%d&sort=%s&order=%s",
-			query.Path, q, p.Page+1, p.ListLimit, p.Sort, p.Order)
-	}
-
-	if p.Page > 0 {
-		p.PagePrev = fmt.Sprintf("%s%spage=%d&list_limit=%d&sort=%s&order=%s",
-			query.Path, q, p.Page-1, p.ListLimit, p.Sort, p.Order)
-	}
-
-	return p
 }
 
 /*
@@ -105,8 +90,8 @@ func ResponsePaginationNew(query *RequestQuery, pag *model.Pagination) *Response
  */
 func RequestQueryParse(r *http.Request) *RequestQuery {
 	raw := r.URL.Query()
-	page := max(util.ParseInt(raw.Get("page")), 1)
-	limit := max(util.ParseInt(raw.Get("limit")), config.DEF_RECORD_MIN_PER_PAGE_COUNT)
+	page := max(parseInt(raw.Get("page")), 1)
+	limit := max(parseInt(raw.Get("limit")), config.DEF_RECORD_MIN_PER_PAGE_COUNT)
 	limit = min(limit, config.DEF_RECORD_MAX_PER_PAGE_COUNT)
 
 	return &RequestQuery{
@@ -116,7 +101,6 @@ func RequestQueryParse(r *http.Request) *RequestQuery {
 		ListLimit: limit,
 		Page:      page,
 		Offset:    (page - 1) * limit,
-		Path:      r.URL.Path,
 		Query:     raw,
 	}
 }
@@ -157,4 +141,13 @@ func httpRespErr(w http.ResponseWriter, err error, errCode int, def string, msg 
 	} else {
 		log.Println("error:", resp.Message)
 	}
+}
+
+func parseInt(str string) int {
+	val, err := strconv.ParseInt(str, 10, 32)
+	if err != nil {
+		return -1
+	}
+
+	return int(val)
 }
