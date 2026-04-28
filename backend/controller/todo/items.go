@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/rlapz/mmweb/model"
 	"github.com/rlapz/mmweb/model/api"
 )
 
@@ -45,11 +44,8 @@ func (t *Todo) getItemList(w http.ResponseWriter, r *http.Request) {
 	}
 
 	/* TODO */
-	pag := model.Pagination{
-		Page:    1,
-		PageCap: 10,
-	}
-	xpag := api.ResponsePaginationNew(query, &pag)
+	pag := query.Paginate()
+	xpag := api.ResponsePaginationNew(pag)
 
 	log.Println(xpag)
 

@@ -72,19 +72,16 @@ func (t *Todo) get(w http.ResponseWriter, r *http.Request) {
 
 func (t *Todo) getList(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
+	query := api.RequestQueryParse(r)
 	userId := t.service.AuthContextGetUserId(ctx)
-	list, err := t.service.TodoGetList(ctx, userId)
+	pag := query.Paginate()
+	list, err := t.service.TodoGetList(ctx, userId, pag)
 	if err != nil {
 		api.HttpErrInternal(w, err, "failed to get todo list")
 		return
 	}
 
-	if len(list) == 0 {
-		api.HttpErrNotFound(w, "no data")
-		return
-	}
-
-	api.HttpOk(w, "ok", list)
+	api.HttpOkWithPagination(w, "ok", list, api.ResponsePaginationNew(pag))
 }
 
 func (t *Todo) post(w http.ResponseWriter, r *http.Request) {

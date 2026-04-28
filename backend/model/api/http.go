@@ -74,14 +74,25 @@ func HttpMethodCheck(w http.ResponseWriter, r *http.Request, expected string) bo
 /*
  * ResponsePagination
  */
-func ResponsePaginationNew(query *RequestQuery, pag *model.Pagination) *ResponsePagination {
+func ResponsePaginationNew(pag *model.Pagination) *ResponsePagination {
+	next := ""
+	if pag.Page < pag.PageCap {
+		next = fmt.Sprintf("%d", pag.Page+1)
+	}
+
+	prev := ""
+	if pag.Page >= pag.PageCap {
+		prev = fmt.Sprintf("%d", pag.Page-1)
+	}
+
 	return &ResponsePagination{
-		Page:      pag.Page,
-		PageCap:   pag.PageCap,
-		ListLimit: pag.ListLimit,
-		ListLen:   pag.ListLen,
-		ListCap:   pag.ListCap,
-		Sort:      pag.Order,
+		Page:    pag.Page,
+		PageCap: pag.PageCap,
+		Limit:   pag.Limit,
+		Len:     pag.Len,
+		Cap:     pag.Cap,
+		Next:    next,
+		Prev:    prev,
 	}
 }
 
@@ -95,18 +106,23 @@ func RequestQueryParse(r *http.Request) *RequestQuery {
 	limit = min(limit, config.DEF_RECORD_MAX_PER_PAGE_COUNT)
 
 	return &RequestQuery{
-		Id:        raw.Get("id"),
-		Sort:      raw.Get("sort"),
-		Order:     raw.Get("order"),
-		ListLimit: limit,
-		Page:      page,
-		Offset:    (page - 1) * limit,
-		Query:     raw,
+		Id:    raw.Get("id"),
+		Limit: limit,
+		Page:  page,
+		Query: raw,
 	}
 }
 
 func (q *RequestQuery) Get(key string) string {
 	return q.Query.Get(key)
+}
+
+func (q *RequestQuery) Paginate() *model.Pagination {
+	return &model.Pagination{
+		Page:   q.Page,
+		Limit:  q.Limit,
+		Offset: (q.Page - 1) * q.Limit,
+	}
 }
 
 /**************

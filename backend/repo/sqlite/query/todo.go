@@ -41,6 +41,15 @@ const TodoSelectByUserId = `
 	select a.id, a.id_user, a.label, a.is_active, a.created_at, a.updated_at
 	from t_todo as a
 	join t_user as b on (b.id = a.id_user)
+	where (b.id = ?) and (is_active = 1)
+	order by a.id
+	limit ? offset ?;
+`
+
+const TodoCountByUserId = `
+	select count(1)
+	from t_todo as a
+	join t_user as b on (b.id = a.id_user)
 	where (b.id = ?) and (is_active = 1);
 `
 

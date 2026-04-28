@@ -99,8 +99,8 @@ func (s *Service) TodoGet(ctx context.Context, id int32) (*model.Todo, error) {
 	return ret, nil
 }
 
-func (s *Service) TodoGetList(ctx context.Context, userId int32) ([]model.Todo, error) {
-	return s.repoTodo.SelectByUserId(ctx, userId)
+func (s *Service) TodoGetList(ctx context.Context, userId int32, pag *model.Pagination) ([]model.Todo, error) {
+	return s.repoTodo.SelectByUserId(ctx, userId, pag)
 }
 
 func (s *Service) TodoGetItem(ctx context.Context, id int32) (*model.TodoItem, error) {

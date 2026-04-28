@@ -31,29 +31,38 @@ func (t *Todo) SelectById(ctx context.Context, id int32) (*model.Todo, error) {
 	return ret, err
 }
 
-func (t *Todo) SelectByUserId(ctx context.Context, id int32) ([]model.Todo, error) {
+func (t *Todo) SelectByUserId(ctx context.Context, id int32, pag *model.Pagination) ([]model.Todo, error) {
 	conn := t.db.GetConn()
 	defer t.db.PutConn(conn)
 
-	rows, err := conn.Db.QueryContext(ctx, query.TodoSelectByUserId, id)
+	count, err := util.DbDataTotalSize(ctx, conn.Db, query.TodoCountByUserId, id)
+	if err != nil {
+		return nil, err
+	}
+
+	rows, err := conn.Db.QueryContext(ctx, query.TodoSelectByUserId, id, pag.Limit, pag.Offset)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	var ret []model.Todo
+	i := 0
+	ret := make([]model.Todo, pag.Limit)
 	for rows.Next() {
-		var item model.Todo
+		item := &ret[i]
 		err = rows.Scan(&item.Id, &item.IdUser, &item.Label, &item.IsActive, &item.CreatedAt,
 			&item.UpdatedAt)
 		if err != nil {
 			return nil, err
 		}
 
-		ret = append(ret, item)
+		i++
 	}
 
-	return ret, nil
+	pag.Cap = count
+	pag.Len = i
+	pag.PageCap = (count / pag.Limit) + 1
+	return ret[:i], nil
 }
 
 func (t *Todo) SelectItemById(ctx context.Context, id int32) (*model.TodoItem, error) {

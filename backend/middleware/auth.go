@@ -8,7 +8,8 @@ import (
 	"github.com/rlapz/mmweb/model/api"
 )
 
-const bear = "Bearer "
+const _bear = "Bearer "
+const _bearLen = len(_bear)
 
 func (m *Middleware) AuthHandler(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -24,18 +25,17 @@ func (m *Middleware) AuthHandler(next http.Handler) http.Handler {
 			return
 		}
 
-		bearLen := len(bear)
-		if tokenlen <= bearLen {
+		if tokenlen <= _bearLen {
 			api.HttpErrBadRequest(w, errorx.AuthTokenInvalid.Error())
 			return
 		}
 
-		if token[:bearLen] != bear {
+		if token[:_bearLen] != _bear {
 			api.HttpErrBadRequest(w, errorx.AuthMethodInvalid.Error())
 			return
 		}
 
-		ctx, err := m.service.AuthContextNew(r.Context(), token[bearLen:])
+		ctx, err := m.service.AuthContextNew(r.Context(), token[_bearLen:])
 		switch {
 		case err == nil: // OK
 		case errors.Is(err, errorx.AuthTokenInvalid):

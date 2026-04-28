@@ -15,7 +15,7 @@ type Auth interface {
 
 type Todo interface {
 	SelectById(ctx context.Context, id int32) (*model.Todo, error)
-	SelectByUserId(ctx context.Context, id int32) ([]model.Todo, error)
+	SelectByUserId(ctx context.Context, id int32, pag *model.Pagination) ([]model.Todo, error)
 	SelectItemById(ctx context.Context, id int32) (*model.TodoItem, error)
 	SelectItemsByTodoId(ctx context.Context, id int32) ([]model.TodoItem, error)
 

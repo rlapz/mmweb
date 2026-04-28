@@ -1,11 +1,14 @@
 package model
 
 type Pagination struct {
-	Page      int
-	PageCap   int
-	ListLimit int
-	ListLen   int
-	ListCap   int
-	Sort      string
-	Order     string
+	Page   int
+	Limit  int
+	Offset int
+	Sort   string
+	Order  string
+
+	// generated
+	PageCap int
+	Len     int
+	Cap     int
 }

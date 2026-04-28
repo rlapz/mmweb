@@ -167,3 +167,12 @@ func DbDataIsExists(row *sql.Row) (bool, error) {
 
 	return isExists, nil
 }
+
+// expect query: `select count(1) from [table]`
+func DbDataTotalSize(ctx context.Context, db *sql.DB, query string, args ...any) (int, error) {
+	row := db.QueryRowContext(ctx, query, args...)
+
+	var ret int
+	err := row.Scan(&ret)
+	return ret, err
+}

@@ -10,24 +10,19 @@ type Response struct {
 }
 
 type ResponsePagination struct {
-	Page      int    `json:"page"`
-	PageCap   int    `json:"page_cap"`
-	ListLimit int    `json:"list_limit"`
-	ListLen   int    `json:"list_len"`
-	ListCap   int    `json:"list_cap"`
-	Sort      string `json:"sort"`
-	Order     string `json:"order"`
+	Page    int `json:"page"`
+	PageCap int `json:"page_cap"`
+	Limit   int `json:"limit"`
+	Len     int `json:"len"`
+	Cap     int `json:"cap"`
 
-	PageNext string `json:"page_next"`
-	PagePrev string `json:"page_prev"`
+	Next string `json:"next,omitempty"`
+	Prev string `json:"prev,omitempty"`
 }
 
 type RequestQuery struct {
-	Id        string
-	Page      int
-	ListLimit int
-	Sort      string
-	Order     string
-	Offset    int
-	Query     url.Values
+	Id    string
+	Page  int
+	Limit int
+	Query url.Values
 }
